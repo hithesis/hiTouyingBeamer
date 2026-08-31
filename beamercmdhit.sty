@@ -1,0 +1,305 @@
+%% beamercmdhit.sty
+%% 哈尔滨工业大学 Beamer 模板文档命令 (Document Commands for the HIT Beamer Theme)
+%%
+%% License: LaTeX Project Public License 1.3c
+%%
+%% This work may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License, either version 1.3c of this license or (at
+%% your option) any later version: https://www.latex-project.org/lppl.txt
+%% This work has the LPPL maintenance status `maintained'.
+%% The Current Maintainer of this work is SchrodingerBlume.
+%%
+%% 本文件只放给文档用的命令，样式在 beamerthemehit.sty 里。
+%% 配 \usetheme{hit} 使用时，主题会自动加载本文件，命令走完整的定制版式；
+%% 换成 Madrid 等内建主题时，同名命令改用标准 Beamer 写法，例如 \titlepage、
+%% \tableofcontents，文档不必改动即可编译。
+%%
+%% Usage:
+%%   \usepackage{beamercmdhit}    % 写在 \usetheme 前后皆可
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamercmdhit}[2026/08/16 v0.1.0 document commands for the HIT beamer theme]
+
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+\RequirePackage{etoolbox}
+
+% \hit@theme@loaded 这个标记由 beamerthemehit.sty 设置。
+% 下面每条命令在调用时检查它是否存在，据此决定走完整版式还是标准 Beamer 写法。
+
+% ------------------------------------------------------------ shared tools ----
+% vi/ 视觉形象资产目录。放在别处则用 \renewcommand 改掉此值。
+\newcommand{\hitvipath}{vi/}
+
+% 把盒子等比缩到指定高度，高与深一起计算。
+% 不用 \resizebox{!}{h}，它只管基线以上的部分，遇到基线居中的 minipage 会缩不到位。
+\newcommand{\hit@scaleboxto}[2]{%
+  \pgfmathsetmacro\hit@sc{(#2)/(\ht#1+\dp#1)}%
+  \setbox#1=\hbox{\scalebox{\hit@sc}{\box#1}}}
+
+% 封面、目录属于前置页，用小写罗马数字单独计数，不占用正文页码。
+\newcounter{hit@front}
+\newif\ifhit@frontmatter \hit@frontmatterfalse
+
+% 封面、结束页这些 plain 帧 Beamer 不画页脚，翻页按钮会跟着消失。
+% 这里把按钮画进背景，坐标与页脚里的一致，翻页时按钮不会跳。
+% 开关由主题声明；没加载主题时补一个假值，下面的判断才有东西可查。
+\@ifundefined{ifhit@navsymbols}{\newif\ifhit@navsymbols}{}
+\newcommand{\hit@navinbg}{%
+  \ifhit@navsymbols
+    \node[anchor=base east,inner sep=0]
+      at (\the\dimexpr\paperwidth-.7cm\relax,\the\hit@footbase) {\hit@footright{}};
+  \fi}
+% 深色底的页面上按钮要提亮，否则看不见。
+\newcommand{\hit@navinbglight}{%
+  \begingroup
+  \setbeamercolor{navigation symbols}{fg=hitneutrallightest!60!hitprimary}%
+  \hit@navinbg
+  \endgroup}
+
+% 设置页脚左边的文字。未加载 hit 主题时此命令不做任何事。
+\newcommand{\hitfooter}[1]{%
+  \ifdefined\hit@theme@loaded\renewcommand{\hit@footerleft}{#1}\fi}
+
+% -------------------------------------------------------------- title page ----
+% 白色标题页：右上角校徽，底部校园线稿背景。文字如何排列见主题的 title page 模板。
+\newcommand{\TitleSlide}{%
+  \ifdefined\hit@theme@loaded\expandafter\hit@TitleSlide@themed
+  \else\expandafter\hit@TitleSlide@plain\fi}
+\newcommand{\hit@TitleSlide@plain}{%
+  \begin{frame}[plain,noframenumbering]\titlepage\end{frame}}
+\newcommand{\hit@TitleSlide@themed}{%
+  \begingroup
+  \setbeamertemplate{background}{%
+    \begin{tikzpicture}
+      \useasboundingbox (0,0) rectangle (\paperwidth,\paperheight);
+      \node[anchor=south west,inner sep=0] at (0,0)
+        {\includegraphics[width=\paperwidth]{\hitvipath hit-vi-mainbuilding-outline}};
+      \node[anchor=north east,inner sep=0]
+        at ($(\paperwidth,\paperheight)+(-.35cm,-.3cm)$)
+        {\includegraphics[height=.95cm]{\hitvipath hit-vi-logo-horizontal}};
+      \hit@navinbg
+    \end{tikzpicture}}%
+  \stepcounter{hit@front}%
+  % 标题页自行计算上下间距，这里固定顶部对齐，不受正文对齐选项影响。
+  \begin{frame}[t,plain,noframenumbering]
+    \titlepage
+  \end{frame}
+  \endgroup}
+
+% 蓝色标题页：上半是校园照片，下半是主色色块。
+% 色块高度随文字变化，但有上限和下限，文字在色块内垂直居中。
+% 文字过多则先降字号，降到最小仍超出则整体缩小。
+\newbox\hit@bluebox
+\newbox\hit@blueauthbox
+\newdimen\hit@bluehgt
+\newdimen\hit@blueT
+\newdimen\hit@bluelogoy
+
+% 作者信息单独装一个盒子：一份排入文字块，另一份用于计算校徽的高度。
+% 蓝色封面照片的取景高度：16:9 与 4:3 值不同，正值越大，照片越往上。
+\newdimen\hit@photoy
+\newcommand{\hit@photoraisewide}{.058\paperwidth}
+\newcommand{\hit@photoraisenarrow}{0pt}
+
+\newcommand{\hit@bt@try}[3]{%
+  \setbox\hit@blueauthbox=\hbox{%
+    \begin{minipage}{.58\paperwidth}%
+      \color{hitneutrallightest}\raggedright
+      {\usebeamerfont{hit blue text}#2\insertauthor\par}%
+      \vskip1.6mm
+      {\usebeamerfont{hit blue text}#2\insertdate\par}%
+      \vskip1.6mm
+      {\usebeamerfont{hit blue institute}#3\insertinstitute\par}%
+    \end{minipage}}%
+  \setbox\hit@bluebox=\hbox{%
+    \begin{minipage}{\dimexpr\paperwidth-2.2cm\relax}
+      \color{hitneutrallightest}\raggedright
+      {\usebeamerfont{hit blue title}#1\inserttitle\par}%
+      \ifdefempty{\insertsubtitle}{}{%
+        \vskip1.8mm{\usebeamerfont{hit blue subtitle}#2\insertsubtitle\par}}%
+      \vskip5mm
+      \noindent\copy\hit@blueauthbox\par
+    \end{minipage}}}
+
+\newcommand{\BlueTitleSlide}{%
+  \ifdefined\hit@theme@loaded\expandafter\hit@BlueTitleSlide@themed
+  \else\expandafter\hit@TitleSlide@plain\fi}
+\newcommand{\hit@BlueTitleSlide@themed}{%
+  \begingroup
+  \setbeamertemplate{background}{%
+    \hit@bt@try{}{}{}%
+    \ifdim\dimexpr\ht\hit@bluebox+\dp\hit@bluebox+1.25cm\relax>.60\paperheight
+      \hit@bt@try{\large}{\small}{\footnotesize}%
+    \fi
+    \ifdim\dimexpr\ht\hit@bluebox+\dp\hit@bluebox+1.25cm\relax>.60\paperheight
+      \hit@bt@try{\normalsize}{\footnotesize}{\scriptsize}%
+    \fi
+    \hit@blueT=\dimexpr\ht\hit@bluebox+\dp\hit@bluebox\relax
+    \ifdim\dimexpr\ht\hit@bluebox+\dp\hit@bluebox+1.25cm\relax>.60\paperheight
+      \hit@scaleboxto\hit@bluebox{.60\paperheight-1.25cm}%
+    \fi
+    \hit@bluehgt=\dimexpr\ht\hit@bluebox+\dp\hit@bluebox+1.25cm\relax
+    \ifdim\hit@bluehgt<.545\paperheight\hit@bluehgt=.545\paperheight\fi
+    % 校徽的高度对准作者信息的中心。前面若整体缩小过，这里按缩放比例折算。
+    \@tempdima=\dimexpr\ht\hit@bluebox+\dp\hit@bluebox\relax
+    \@tempdimb=\dimexpr\ht\hit@blueauthbox+\dp\hit@blueauthbox\relax
+    \pgfmathsetlength\hit@bluelogoy{%
+      .5\hit@bluehgt-.5\@tempdima+.5\@tempdimb/\hit@blueT*\@tempdima}%
+    \begin{tikzpicture}
+      \useasboundingbox (0,0) rectangle (\paperwidth,\paperheight);
+      % 两种画幅露出的照片高度不同，因此取景位置不同：
+      %   16:9 可见带窄（约 0.25 倍页宽），照片往上放一点，裁掉多余天空，塔尖靠近页顶；
+      %   4:3  可见带高，照片顶边直接对齐页顶。
+      % 值为正表示把照片往上放。改图后重新对一下这两个数即可。
+      \ifdim\paperheight<.6\paperwidth
+        \hit@photoy=\dimexpr\paperheight+\hit@photoraisewide\relax
+      \else
+        \hit@photoy=\dimexpr\paperheight+\hit@photoraisenarrow\relax
+      \fi
+      \node[anchor=north west,inner sep=0] at (0,\hit@photoy)
+        {\includegraphics[width=\paperwidth]{\hitvipath hit-vi-mainbuilding-photo}};
+      \fill[hitprimary] (0,0) rectangle (\paperwidth,\hit@bluehgt);
+      \draw[hitneutrallight,line width=.8pt]
+        (0,\hit@bluehgt) -- (\paperwidth,\hit@bluehgt);
+      \node[anchor=east,inner sep=0]
+        at ($(\paperwidth,\hit@bluelogoy)+(-.95cm,0)$)
+        {\includegraphics[width=.27\paperwidth]{\hitvipath hit-vi-logo-horizontal-white}};
+      \node[anchor=west,inner sep=0] at (.95cm,.5\hit@bluehgt) {\box\hit@bluebox};
+      \hit@navinbglight
+    \end{tikzpicture}}%
+  \stepcounter{hit@front}%
+  \begin{frame}[plain,noframenumbering]
+  \end{frame}
+  \endgroup}
+
+% ----------------------------------------------------------------- outline ----
+\newcommand{\hitoutlinetitle}{目录}
+
+% 目录页专用的条目样式：浅色大编号，主色粗体章节名，灰色 ○ 小节。
+% 只在 \OutlineSlide 内生效，文档里自己写的 \tableofcontents 不受影响。
+\newcommand{\hit@ol@settemplates}{%
+  \setbeamertemplate{section in toc}{%
+    \vskip1.2ex
+    {\usebeamerfont{section in toc}\hit@tocsechook\bfseries\raggedright
+     \hangindent2.6em\hangafter\@ne
+     \leavevmode\hbox to 2.6em{{\color{hitprimary!45}\large
+       \two@digits{\inserttocsectionnumber}}\hfil}%
+     {\color{hitprimary}\inserttocsection}\par}%
+    \nopagebreak\vskip.7ex}%
+  \setbeamertemplate{subsection in toc}{%
+    {\usebeamerfont{subsection in toc}\hit@tocsubhook\raggedright
+     \leftskip2.6em\color{hitneutraldarkest!70}%
+     \raisebox{.18ex}{\scriptsize$\circ$}\hspace{.5em}\inserttocsubsection\par}\vskip.5ex}}
+
+% 目录正文：不到 3 章排单栏，否则对半分成两栏，两栏均顶部对齐。
+% 这里不用 multicols，它为了让两栏等高会把条目间距拉开。
+% 内容过高则先降字号，降完仍过高则整体缩小。
+\newbox\hit@outbox
+\newdimen\hit@secavail
+\newcommand{\hit@outlinetoc}{%
+  \@tempcnta=\totvalue{hit@sectiontotal}\relax
+  \@tempcntb=\@tempcnta\advance\@tempcntb\@ne\divide\@tempcntb\tw@
+  \edef\hit@ol@callA{\noexpand\tableofcontents[sections={1-\the\@tempcntb}]}%
+  \edef\hit@ol@callB{\noexpand\tableofcontents[sections={\the\numexpr\@tempcntb+1\relax-\the\@tempcnta}]}%
+  \def\hit@ol@try##1##2{%
+    \def\hit@tocsechook{##1}\def\hit@tocsubhook{##2}%
+    \ifnum\@tempcnta<3
+      \setbox\hit@outbox=\vbox{\hsize=\textwidth\tableofcontents}%
+    \else
+      \setbox\hit@outbox=\vbox{\hsize=\textwidth\noindent
+        \begin{minipage}[t]{.47\textwidth}\hit@ol@callA\end{minipage}%
+        \hfill
+        \begin{minipage}[t]{.47\textwidth}\hit@ol@callB\end{minipage}\par}%
+    \fi}%
+  \hit@ol@try{}{}%
+  \ifdim\dimexpr\ht\hit@outbox+\dp\hit@outbox\relax>\hit@secavail
+    \hit@ol@try{\small}{\footnotesize}%
+  \fi
+  \ifdim\dimexpr\ht\hit@outbox+\dp\hit@outbox\relax>\hit@secavail
+    \hit@ol@try{\footnotesize}{\scriptsize}%
+  \fi
+  \ifdim\dimexpr\ht\hit@outbox+\dp\hit@outbox\relax>\hit@secavail
+    \hit@scaleboxto\hit@outbox{\hit@secavail}%
+  \fi
+  \noindent\box\hit@outbox}
+
+\newcommand{\OutlineSlide}{%
+  \ifdefined\hit@theme@loaded\expandafter\hit@OutlineSlide@themed
+  \else\expandafter\hit@OutlineSlide@plain\fi}
+\newcommand{\hit@OutlineSlide@plain}{%
+  \begin{frame}{\hitoutlinetitle}\tableofcontents\end{frame}}
+\newcommand{\hit@OutlineSlide@themed}{%
+  \begingroup
+  \stepcounter{hit@front}\hit@frontmattertrue
+  \setbeamertemplate{headline}{}%
+  \hit@ol@settemplates
+  \begin{frame}[t,noframenumbering]
+    \vskip2mm
+    \setbox\@tempboxa=\hbox{{\usebeamerfont{hit outline title}%
+      \usebeamercolor[fg]{frametitle}\hitoutlinetitle}}%
+    \hit@secavail=\dimexpr\textheight-\ht\@tempboxa-\dp\@tempboxa-2mm-1.6mm-6mm-8mm\relax
+    \begin{minipage}[b]{\dimexpr\textwidth-.24\paperwidth\relax}%
+      \box\@tempboxa
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[b]{.22\paperwidth}%
+      \raggedleft\includegraphics[width=.21\paperwidth]{\hitvipath hit-vi-motto}%
+    \end{minipage}\par
+    \vskip1.6mm
+    {\color{hitprimary}\hrule height .8pt}%
+    \vskip6mm
+    \hit@outlinetoc
+  \end{frame}
+  \endgroup}
+
+% ------------------------------------------------------------- focus slide ----
+\newcommand{\FocusSlide}{%
+  \ifdefined\hit@theme@loaded\expandafter\hit@FocusSlide@themed
+  \else\expandafter\hit@FocusSlide@plain\fi}
+\newcommand{\hit@FocusSlide@plain}[1]{%
+  \begin{frame}[c,plain,noframenumbering]\centering{\Large #1\par}\end{frame}}
+\newcommand{\hit@FocusSlide@themed}[1]{%
+  \begingroup
+  \setbeamercolor{background canvas}{bg=hitprimary}%
+  \setbeamertemplate{background}{%
+    \begin{tikzpicture}
+      \useasboundingbox (0,0) rectangle (\paperwidth,\paperheight);
+      \hit@navinbglight
+    \end{tikzpicture}}%
+  \begin{frame}[c,plain,noframenumbering]
+    \centering
+    {\color{hitneutrallightest}\Large #1\par}%
+  \end{frame}
+  \endgroup}
+
+% -------------------------------------------------------------- end slides ----
+\newcommand{\EndSlide}{%
+  \ifdefined\hit@theme@loaded\expandafter\hit@EndSlide@themed
+  \else\expandafter\hit@EndSlide@plain\fi}
+\newcommand{\hit@EndSlide@plain}[1]{%
+  \begin{frame}[c,plain,noframenumbering]\centering{\LARGE\bfseries #1\par}\end{frame}}
+% 结束页底图和封面是同一张，主楼在右下方，所以内容同样靠左上排，
+% 起排位置和左缘都跟封面一致。竖版校徽在上，致谢文字在下。
+\newcommand{\hit@EndSlide@themed}[1]{%
+  \begingroup
+  \setbeamertemplate{background}{%
+    \begin{tikzpicture}
+      \useasboundingbox (0,0) rectangle (\paperwidth,\paperheight);
+      \node[anchor=south west,inner sep=0] at (0,0)
+        {\includegraphics[width=\paperwidth]{\hitvipath hit-vi-mainbuilding-outline}};
+      \hit@navinbg
+    \end{tikzpicture}}%
+  \begin{frame}[t,plain,noframenumbering]
+    \vspace*{.075\paperheight}%
+    \noindent\hspace*{\hit@tpindent}%
+    \includegraphics[width=4.2cm]{\hitvipath hit-vi-logo-vertical}\par
+    \vspace*{.055\paperheight}%
+    \noindent\hspace*{\hit@tpindent}%
+    \begin{minipage}{.44\paperwidth}\raggedright
+      {\LARGE\bfseries\color{hitprimary}#1\par}%
+    \end{minipage}%
+  \end{frame}
+  \endgroup}
+
+\endinput

@@ -1,0 +1,255 @@
+% 更现代的哈尔滨工业大学 Beamer 幻灯片主题 hiTouyingBeamer 示例
+% 编译：latexmk -xelatex template.tex （参考文献需要 biber，latexmk 会自动调用）
+% 画幅写 169 或 43；还可以加基础字号，从 8pt 到 20pt 都支持，
+% 版式里的间距和字号都是相对值，会跟着一起缩放。
+\documentclass[aspectratio=169]{ctexbeamer} % 或 43
+% 主题选项写在方括号里，可以叠加，例如 \usetheme[serif,top,navsymbols]{hit}：
+%   serif         用衬线字体；不写则用非衬线。
+%   top           正文顶部对齐；不写则垂直居中。
+%   navsymbols    显示右下角翻页按钮；不写则隐藏。
+%   nosectionpage 不在每个 \section 处自动插入章节过渡页。
+\usetheme{hit}
+% 命令层，提供 \TitleSlide 等命令。hit 主题会自动加载它；
+% 这里显式写出后，把上面一行换成任意内建主题（如 Madrid）文档仍可直接编译。
+\usepackage{beamercmdhit}
+
+% 本模板额外提供的整页命令：
+%   \TitleSlide        白色封面，图在右下，文字在左上
+%   \BlueTitleSlide    彩色封面，上方校园照片，下方窝工主色彩条
+%   \OutlineSlide      目录页
+%   \FocusSlide{内容}  整页主色的强调页，用来放一句话
+%   \EndSlide{内容}    结束页，校徽在上、致谢文字在下
+%
+% 可改的配置（都写在 \usetheme 之后）：
+%   \hitfooter{文字}                        页脚左侧文字，默认继承 \institute
+%   \renewcommand{\hitoutlinetitle}{目录}   目录页的标题
+%   \renewcommand{\hitvipath}{vi/}          视觉形象资产目录，想把 vi/ 挪走时改这里
+%   \definecolor{hitprimary}{HTML}{166183}主色，默认取自校徽
+%   \setbeamerfont{frametitle}{size=\Large} 单独调某个元素的字号
+
+% 如需使用其他西文字体，参考下面两行注释，例如这里指定的字体是 Libertinus Serif。
+% \usepackage{fontspec}
+% \setmainfont{Libertinus Serif}
+
+\usepackage{amssymb}
+\usetikzlibrary{overlay-beamer-styles}
+\usepackage[backend=biber,style=gb7714-2015]{biblatex}
+\addbibresource{ref.bib}
+
+\title{更现代的哈尔滨工业大学 Beamer 幻灯片主题—\textsc{hiTouyingBeamer}}
+\subtitle{V1.2026a}
+\author{Schrödinger Blume}
+\date{\today}
+\institute{哈尔滨工业大学}
+% \hitfooter{哈工大}  % 页脚左侧文字，默认继承 \institute
+
+% 启用演讲者视图：放映时第二屏显示 \note 里的备注，正屏只放幻灯片。
+% \setbeameroption{show notes on second screen=right}
+
+\begin{document}
+
+\TitleSlide
+
+\BlueTitleSlide
+
+\OutlineSlide
+
+% 章节名很长时可以给个短名：\section[短名]{很长的章节名}，
+% 目录页、过渡页和顶部导航条都会改用短名，正文标题仍是全名。
+\section{LaTeX 与 Beamer}
+
+\subsection{LaTeX}
+
+\begin{frame}{LaTeX}
+  LaTeX 是一个久经考验的排版系统，拥有丰富的宏包生态。本演示文稿不详细介绍
+  LaTeX 的使用，你可以在 \href{https://www.latex-project.org/}{LaTeX 项目主页}
+  中找到更多信息。
+\end{frame}
+
+\subsection{Beamer}
+
+\begin{frame}{Beamer}
+  Beamer 是 LaTeX 的幻灯片文档类。beamer 一词来自德语，意为投影仪；
+  而本模板的灵感及理念源自于 Typst 的 Touying 主题
+  \href{https://github.com/sjtug/touying-sjtu}{touying-simpl-sjtu}。
+  你可以在\href{https://latex.us/macros/latex/contrib/beamer/doc/beameruserguide.pdf}{The \textsc{Beamer} \textit{class}}
+  中详细了解其用法。
+  \parencite{beamer2026}
+\end{frame}
+
+\section{Beamer 幻灯片动画}
+
+\subsection{简单动画}
+
+\begin{frame}{简单动画}
+  使用 \texttt{\textbackslash pause} \pause 暂缓显示内容。
+
+  \pause
+  就像这样。
+
+  % 重置 pause 计数器，再用 \onslide<1-> 解除前面 \pause 的遮盖，
+  % 让后续内容与前文并行显示。
+  \setcounter{beamerpauses}{1}\onslide<1->
+  同时，\pause 我们可以用这种写法 \pause 并行显示其他内容。
+
+  \note[item]{使用 \texttt{show notes on second screen=right}
+    启用演讲提示，否则将不会显示。}
+\end{frame}
+
+\subsection{覆盖层动画}
+
+\begin{frame}{覆盖层动画}
+  在子幻灯片中，我们可以：
+
+  \medskip
+  使用 \onslide<2->{\texttt{\textbackslash onslide} 指令}（预留空间）
+
+  \medskip
+  使用 \only<2->{\texttt{\textbackslash only} 指令}（不预留空间）
+
+  \medskip
+  \alt<2->{使用 \texttt{\textbackslash alt} 指令 $\checkmark$}%
+          {多次调用 \texttt{\textbackslash only} 指令 $\times$}
+  从多个备选项中选择一个。
+\end{frame}
+
+\subsection{数学公式动画}
+
+\begin{frame}{数学公式动画}
+  在数学公式中同样可以使用覆盖指令：
+  \begin{align*}
+    f(x) &= x^2 + 2x + 1              \\
+    \uncover<2->{&= (x + 1)^2}
+  \end{align*}
+
+  如您所见，\pause 这是 $f(x)$ 的表达式。
+
+  \pause
+  通过因式分解，我们得到了结果。
+\end{frame}
+
+\section{与其他宏包集成}
+
+\subsection{TikZ 动画}
+
+\begin{frame}{TikZ 动画}
+  在 Beamer 中，TikZ 图形可以直接使用覆盖指令逐步显示：
+
+  \bigskip
+  \centering
+  \begin{tikzpicture}[
+      state/.style={draw=hitprimary,thick,circle,minimum size=3.2em,
+                    fill=hitprimary!10},
+      lab/.style={font=\ttfamily\small},
+      >=stealth,
+    ]
+    \node[state] (reading) {\ttfamily reading};
+    \node[state,visible on=<2->] (eof)    at (4,0) {\ttfamily eof};
+    \node[state,visible on=<3->] (closed) at (8,0) {\ttfamily closed};
+    \draw[->,visible on=<2->] (reading) -- node[lab,above] {read()}  (eof);
+    \draw[->,visible on=<3->] (eof)     -- node[lab,above] {close()} (closed);
+    \draw[->,visible on=<3->] (reading) to[bend right=25]
+      node[lab,below] {close()} (closed);
+  \end{tikzpicture}
+\end{frame}
+
+\subsection{其他宏包}
+
+\begin{frame}{其他宏包}
+  \framesubtitle{pgfplots, listings, minted, tcolorbox \ldots}
+  Beamer 与绝大多数 LaTeX 宏包兼容，
+  详见 \href{https://ctan.org/topic/presentation}{CTAN presentation 主题分类}。
+\end{frame}
+
+\section{其他功能}
+
+\subsection{双栏布局}
+
+\begin{frame}{双栏布局}
+  \begin{columns}[t]
+    \begin{column}{.48\textwidth}
+      我仰望星空，
+
+      它是那样辽阔而深邃；
+
+      那无穷的真理，
+
+      让我苦苦地求索、追随。
+
+      我仰望星空，
+
+      它是那样庄严而圣洁；
+
+      那凛然的正义，
+
+      让我充满热爱、感到敬畏。
+    \end{column}
+    \begin{column}{.48\textwidth}
+      我仰望星空，
+
+      它是那样自由而宁静；
+
+      那博大的胸怀，
+
+      让我的心灵栖息、依偎。
+
+      我仰望星空，
+
+      它是那样壮丽而光辉；
+
+      那永恒的炽热，
+
+      让我心中燃起希望的烈焰、响起春雷。
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{内容跨页}
+
+\begin{frame}[allowframebreaks]{内容跨页}
+  豫章故郡，洪都新府。星分翼轸，地接衡庐。襟三江而带五湖，控蛮荆而引瓯越。物华天宝，龙光射牛斗之墟；人杰地灵，徐孺下陈蕃之榻。雄州雾列，俊采星驰。台隍枕夷夏之交，宾主尽东南之美。都督阎公之雅望，棨戟遥临；宇文新州之懿范，襜帷暂驻。十旬休假，胜友如云；千里逢迎，高朋满座。腾蛟起凤，孟学士之词宗；紫电青霜，王将军之武库。家君作宰，路出名区；童子何知，躬逢胜饯。
+
+  时维九月，序属三秋。潦水尽而寒潭清，烟光凝而暮山紫。俨骖騑于上路，访风景于崇阿。临帝子之长洲，得天人之旧馆。层峦耸翠，上出重霄；飞阁流丹，下临无地。鹤汀凫渚，穷岛屿之萦回；桂殿兰宫，即冈峦之体势。
+
+  披绣闼，俯雕甍，山原旷其盈视，川泽纡其骇瞩。闾阎扑地，钟鸣鼎食之家；舸舰弥津，青雀黄龙之舳。云销雨霁，彩彻区明。落霞与孤鹜齐飞，秋水共长天一色。渔舟唱晚，响穷彭蠡之滨，雁阵惊寒，声断衡阳之浦。
+
+  遥襟甫畅，逸兴遄飞。爽籁发而清风生，纤歌凝而白云遏。睢园绿竹，气凌彭泽之樽；邺水朱华，光照临川之笔。四美具，二难并。穷睇眄于中天，极娱游于暇日。天高地迥，觉宇宙之无穷；兴尽悲来，识盈虚之有数。望长安于日下，目吴会于云间。地势极而南溟深，天柱高而北辰远。关山难越，谁悲失路之人；萍水相逢，尽是他乡之客。怀帝阍而不见，奉宣室以何年？
+
+  嗟乎！时运不齐，命途多舛。冯唐易老，李广难封。屈贾谊于长沙，非无圣主；窜梁鸿于海曲，岂乏明时？所赖君子见机，达人知命。老当益壮，宁移白首之心？穷且益坚，不坠青云之志。酌贪泉而觉爽，处涸辙以犹欢。北海虽赊，扶摇可接；东隅已逝，桑榆非晚。孟尝高洁，空余报国之情；阮籍猖狂，岂效穷途之哭！
+
+  勃，三尺微命，一介书生。无路请缨，等终军之弱冠；有怀投笔，慕宗悫之长风。舍簪笏于百龄，奉晨昏于万里。非谢家之宝树，接孟氏之芳邻。他日趋庭，叨陪鲤对；今兹捧袂，喜托龙门。杨意不逢，抚凌云而自惜；钟期既遇，奏流水以何惭？
+
+  呜呼！胜地不常，盛筵难再；兰亭已矣，梓泽丘墟。临别赠言，幸承恩于伟饯；登高作赋，是所望于群公。敢竭鄙怀，恭疏短引；一言均赋，四韵俱成。请洒潘江，各倾陆海云尔。
+
+  \begin{center}
+    滕王高阁临江渚，佩玉鸣鸾罢歌舞。\\
+    画栋朝飞南浦云，珠帘暮卷西山雨。\\
+    闲云潭影日悠悠，物换星移几度秋。\\
+    阁中帝子今何在？槛外长江空自流。
+  \end{center}
+\end{frame}
+
+% 附录：页码的分母固定为正文总页数，同时隐藏页脚。
+\appendix
+
+\begin{frame}{附注}
+  \begin{itemize}
+    \item 您可以使用：\texttt{git clone
+      https://github.com/hithesis/hiTouyingBeamer}
+      获取本模板，并以 \texttt{template.tex} 为骨架创建演示文稿。
+    \item 本模板的灵感及理念来自于 Touying 主题
+      \href{https://github.com/sjtug/touying-sjtu}%
+      {touying-simpl-sjtu} 移植而来，在此致谢。
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{参考文献}
+  \printbibliography[heading=none]
+\end{frame}
+
+% 强调页：整页主色，适合放一句话。
+% \FocusSlide{将大局逆转吧！}
+
+\EndSlide{感谢使用\par\medskip Thanks for Using!}
+
+\end{document}

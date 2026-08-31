@@ -1,0 +1,22 @@
+.DS_Store
+
+# LaTeX 编译产物
+*.aux
+*.log
+*.nav
+*.snm
+*.toc
+*.out
+*.fls
+*.fdb_latexmk
+*.xdv
+*.dvi
+*.bbl
+*.bcf
+*.blg
+*.run.xml
+*.synctex.gz
+
+# 除 template.pdf 外的 PDF 都不入库
+*.pdf
+!template.pdf
