@@ -1,10 +1,6 @@
 %% beamerthemehit.sty
 %% 哈尔滨工业大学 Beamer 幻灯片主题 (Beamer Slide Theme for HIT)
 %%
-%% Converted from the Touying (Typst) theme touying-simpl-neu:
-%%   https://github.com/SchrodingerBlume/touying-simpl-neu
-%% which is based on touying-sjtu and the Touying dewdrop theme.
-%%
 %% License: LaTeX Project Public License 1.3c
 %%
 %% This work may be distributed and/or modified under the conditions of the
@@ -17,6 +13,23 @@
 %% \TitleSlide、\OutlineSlide 这些给文档用的命令在 beamercmdhit.sty 里，
 %% 本主题会自动加载它。
 %%
+%%
+%% 更新记录
+%%   v1.2026b  2026/09/02
+%%     - 修正校训图会随标题内容上下浮动的问题。原先图和帧标题排在同一行里，
+%%       行的基线由标题末行决定，于是带副标题或标题换到第二行时，图会被顶得
+%%       离下方横线越来越远。现在图改为零高零深的盒子，贴着横线单独放置，
+%%       图与横线的间距恒定，与标题几行、有无副标题无关。
+%%     - 标题行补上最小高度垫片 \hit@ftminheight，补回校训图移出该行后少掉的
+%%       行高，单行标题时横线位置不变；两行标题也落在同一位置。
+%%     - 章节过渡页同样处理：天际线图移出标题行，贴着横线放，间距恒定。
+%%     - 章节过渡页的横线不再随标题长短跳动。原先兜底加在行高上（不足 .85cm
+%%       按 .85cm 算），而定位用的是兜底值不是实际行高；
+%%       现在兜底只加在上方留白上，行底恒定落在 35.5% 页高处。
+%%     - 标题行改为按整体定位，并用 \nointerlineskip 去掉随盒高变化的行间胶。
+%%   v1.2026a  2026/08/31
+%%     - 首次发布。
+%%
 %% Usage:
 %%   \documentclass[aspectratio=169]{ctexbeamer}
 %%   \usetheme{hit}
@@ -28,7 +41,7 @@
 %%   nosectionpage - 不在每个 \section 处自动插入章节过渡页
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{beamerthemehit}[2026/08/16 v0.1.0 HIT beamer theme]
+\ProvidesPackage{beamerthemehit}[2026/09/02 v1.2026b HIT beamer theme]
 
 \RequirePackage{tikz}
 \usetikzlibrary{calc}
@@ -216,8 +229,10 @@
   \setbox\hit@fttlbox=\hbox{%
     \begin{minipage}[b]{\dimexpr\textwidth-2.7cm\relax}%
       \usebeamerfont{frametitle}#1\raggedright
-      % 垫片让每行的高与深一致：纯拉丁标题的字形比中文矮，
-      % 不垫的话标题盒子高度随标题内容变，下面那条横线就会跟着上下移。
+      % \vphantom 让每行的高与深一致；\rule 撑起标题行的最小高度，
+      % 补上 v1.2026b 把校训图移出这一行后少掉的那部分行高，
+      % 保证单行标题时横线仍停在原来的位置。
+      \rule{0pt}{\hit@ftminheight}%
       \vphantom{汉Ag}\insertframetitle%
       \ifdefempty{\insertframesubtitle}{}{%
         \\[.2ex]{\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle}}%
@@ -225,6 +240,11 @@
   \begingroup\usebeamerfont{frametitle}#1%
     \xdef\hit@ft@cap{\the\dimexpr2.6\baselineskip\relax}%
   \endgroup}
+
+% 标题行的最小高度，等于校训图原先在行内占的高度。
+\newcommand{\hit@ftminheight}{9mm}
+% 校训图底边高出横线多少。
+\newcommand{\hit@ftmottoraise}{.6mm}
 
 \defbeamertemplate*{frametitle}{hit}{%
   \nointerlineskip
@@ -237,13 +257,18 @@
     \hit@ft@try{\small}%
   \fi
   \begin{beamercolorbox}[wd=\textwidth]{frametitle}%
-    \box\hit@fttlbox
-    \hfill
-    \begin{minipage}[b]{2.5cm}%
-      \raggedleft\includegraphics[width=2.4cm]{\hitvipath hit-vi-motto}%
-    \end{minipage}\par
+    \box\hit@fttlbox\par
   \end{beamercolorbox}%
   \vskip1.2mm%
+  % v1.2026b：校训图原先和标题排在同一行里，行的基线由标题末行决定，
+  % 于是带副标题或标题换行时图会被顶得离横线越来越远。改成零高零深的盒子
+  % 贴着横线放，图与横线的间距就固定了。
+  % 标题盒子的宽度已经预留了右侧 2.7cm，两者不会冲突。
+  \nointerlineskip
+  \hbox to \textwidth{\hfill
+    \raisebox{\hit@ftmottoraise}[0pt][0pt]{%
+      \includegraphics[width=2.4cm]{\hitvipath hit-vi-motto}}}%
+  \nointerlineskip
   {\color{hitprimary}\hrule height .8pt}%
   \vskip2.2mm%
 }
@@ -534,9 +559,7 @@
   % beamer 收集帧体时会把它和 \begin/\end 一起数错。
   \ifdim\hit@secbannerwd>\z@
     \setbox\hit@secbannerbox=\hbox{%
-      % 往下压一点，让图的底边贴近标题下面那条横线。
-      \raisebox{-3.4mm}[0pt][0pt]{%
-        \includegraphics[width=\hit@secbannerwd]{\hitvipath hit-vi-motto-skyline}}}%
+      \includegraphics[width=\hit@secbannerwd]{\hitvipath hit-vi-motto-skyline}}%
   \else
     \setbox\hit@secbannerbox=\hbox{}%
   \fi}
@@ -569,22 +592,40 @@
     \hit@scaleboxto\hit@secttlbox{.24\paperheight}%
   \fi}
 
+% 天际线图底边高出横线多少。
+\newcommand{\hit@secbannerraise}{.6mm}
+\newbox\hit@secrowbox
+
 \newcommand{\hit@sectionframe}{%
   \begingroup
   \setbeamertemplate{headline}{}%
   \begin{frame}[t]
     \hit@makesectiontitle
-    \@tempdima=\dimexpr\ht\hit@secttlbox+\dp\hit@secttlbox\relax
-    \ifdim\@tempdima<.85cm\@tempdima=.85cm\fi
-    \@tempdimb=\dimexpr.37\paperheight-\@tempdima\relax
+    % v1.2026b：标题整体按实际高度定位。原先用的是内层盒子的高度，
+    % 而外面还套了一层 minipage，两者对不上，以致横线位置于是随标题行数乱跳。
+    \setbox\hit@secrowbox=\hbox{%
+      \begin{minipage}[b]{\hit@seccolwd}%
+        \box\hit@secttlbox
+      \end{minipage}}%
+    % 兜底只加在上方留白上。原先是给行高兜底（不足 .85cm 按 .85cm 算），
+    % 可定位用的是这个兜底值而不是实际行高，结果钉住的是行顶不是行底，
+    % 横线于是随标题长短乱跳。
+    \@tempdima=\dimexpr\ht\hit@secrowbox+\dp\hit@secrowbox\relax
+    \@tempdimb=\dimexpr.355\paperheight-\@tempdima\relax
     \ifdim\@tempdimb<.03\paperheight\@tempdimb=.03\paperheight\fi
     \hit@secavail=\dimexpr\textheight-\@tempdimb-\@tempdima-1.6mm-7mm-3mm\relax
     \vspace*{\@tempdimb}%
-    \begin{minipage}[b]{\hit@seccolwd}%
-      \box\hit@secttlbox
-    \end{minipage}%
-    \hfill\box\hit@secbannerbox\par
+    % 不加 \nointerlineskip 的话，TeX 会按盒子高度插入行间胶，
+    % 盒子越高胶越少，等于把行顶而不是行底钉住，横线就又跟着标题行数跑了。
+    \nointerlineskip
+    \noindent\box\hit@secrowbox\par
     \vskip1.6mm
+    % v1.2026b：天际线图原先和标题排在同一行里，挂在行的基线上，标题换行时
+    % 就被顶得离横线忽远忽近。改成零高零深的盒子贴着横线单独放。
+    \nointerlineskip
+    \hbox to \textwidth{\hfill
+      \raisebox{\hit@secbannerraise}[0pt][0pt]{\box\hit@secbannerbox}}%
+    \nointerlineskip
     {\color{hitprimary}\hrule height .8pt}%
     \vskip7mm
     % 分栏内容超出剩余高度时，整体缩小后放入。
