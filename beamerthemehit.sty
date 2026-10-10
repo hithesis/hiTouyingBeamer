@@ -10,21 +10,27 @@
 %% The Current Maintainer of this work is SchrodingerBlume.
 %%
 %% 本文件是主题入口：解析选项，然后把工作交给主题文件。
-%%   beamerthemehitouying.sty   现代主题（默认，写 touying 也一样）
-%%   beamerthemehitclassic.sty  经典主题（classic 选项，移植自旧 HITBeamer）
+%%   beamerthemehitouying.sty      现代主题（默认，写 touying 也一样）
+%%   beamerthemehitclassic.sty     经典主题（classic 选项，移植自旧 HITBeamer）
+%%   beamerthemehitminimalist.sty  简约主题（minimalist 选项，XePWang 提供）
 %% \TitleSlide、\OutlineSlide 这些给文档用的命令在 beamercmdhit.sty 里，
 %% 本主题会自动加载它。
 %%
 %%
 %% 更新记录
+%%   v2.2026b  2026/10/10
+%%     - 新增 minimalist 选项：简约主题（XePWang 提供，带顶部章节导航与
+%%       浅灰画布）；sectionpage/nosectionpage 改成记录用户是否显式写过，
+%%       供默认不插章节页的主题使用。
+%%     - top/center、navsymbols/nonavsymbols 补成对选项，覆盖各主题默认。
 %%   v2.2026a  2026/10/09
 %%     - 新增 classic 选项：经典主题，移植自旧的 HITBeamer 主题
 %%       （https://github.com/hithesis/HITBeamer，基于 THU-Beamer-Theme）。
-%%       默认仍是现代主题；两套主题共用 beamercmdhit.sty 命令层。
+%%       默认仍是现代主题；共用 beamercmdhit.sty 命令层。
 %%     - 现代主题拆到 beamerthemehitouying.sty，本文件只做选项与分派；
 %%       新增 touying 选项，显式选现代主题。
-%%     - 新增 minted 选项：代码用 minted 排版，两套主题都可用。
-%%     - serif/sans/top/navsymbols/nosectionpage 五个选项两套主题都生效；
+%%     - 新增 minted 选项：代码用 minted 排版，各主题都可用。
+%%     - serif/sans/top/navsymbols/nosectionpage 选项各主题都生效；
 %%       字体不写时用各主题的默认：现代主题非衬线，经典主题衬线。
 %%   v1.2026b  2026/09/02
 %%     - 修正校训图会随标题内容上下浮动的问题。原先图和帧标题排在同一行里，
@@ -48,15 +54,16 @@
 %% Options:
 %%   classic       - 用经典主题（旧 HITBeamer 观感）；不写则用现代主题
 %%   touying       - 用现代主题（默认），写不写都一样
+%%   minimalist    - 用简约主题（带顶部章节导航与浅灰画布）
 %%   minted        - 代码用 minted 排版（编译要加 -shell-escape）
 %%   serif         - 用衬线字体（经典主题的默认）
 %%   sans          - 用非衬线字体（现代主题的默认）
-%%   top           - 正文顶部对齐；不写则跟正文垂直居中
-%%   navsymbols    - 显示右下角的翻页按钮；不写则隐藏
+%%   top / center  - 正文顶部对齐 / 垂直居中；不写则居中
+%%   navsymbols / nonavsymbols - 显示 / 隐藏右下角的翻页按钮；不写则隐藏
 %%   nosectionpage - 不在每个 \section 处自动插入章节过渡页
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{beamerthemehit}[2026/10/09 v2.2026a HIT beamer theme]
+\ProvidesPackage{beamerthemehit}[2026/10/10 v2.2026b HIT beamer theme]
 
 \RequirePackage{tikz}
 \usetikzlibrary{calc}
@@ -65,30 +72,37 @@
 
 \mode<presentation>
 
-% ---------------------------------------------------------------- options ----
 \newif\ifhit@sectionpage \hit@sectionpagetrue
-\DeclareOptionBeamer{sectionpage}{\hit@sectionpagetrue}
-\DeclareOptionBeamer{nosectionpage}{\hit@sectionpagefalse}
+\newif\ifhit@opt@sectionpage \hit@opt@sectionpagefalse
+\newif\ifhit@opt@nosectionpage \hit@opt@nosectionpagefalse
+\DeclareOptionBeamer{sectionpage}{\hit@sectionpagetrue\hit@opt@sectionpagetrue\hit@opt@nosectionpagefalse}
+\DeclareOptionBeamer{nosectionpage}{\hit@sectionpagefalse\hit@opt@nosectionpagetrue\hit@opt@sectionpagefalse}
 % serif / sans: 字体。不写时用各主题的默认：现代主题非衬线，经典主题衬线。
 % 两个同时写时，后写的生效。
 \newif\ifhit@serif \hit@seriffalse
 \newif\ifhit@sans \hit@sansfalse
 \DeclareOptionBeamer{serif}{\hit@seriftrue\hit@sansfalse}
 \DeclareOptionBeamer{sans}{\hit@seriffalse\hit@sanstrue}
-% top: 正文顶部对齐；默认正文垂直居中。
+% top / center: 正文顶部对齐 / 垂直居中（默认）。两个同时写时，后写的生效。
 % 想临时置顶也可以用文档类选项 t，或在单个 frame 上写 [t]。
 \newif\ifhit@top \hit@topfalse
 \DeclareOptionBeamer{top}{\hit@toptrue}
-% navsymbols: 显示 beamer 右下角那组翻页按钮；默认隐藏。
+\DeclareOptionBeamer{center}{\hit@topfalse}
+% navsymbols / nonavsymbols: 显示 / 隐藏（默认）beamer 右下角那组翻页按钮。
+% 两个同时写时，后写的生效。
 \newif\ifhit@navsymbols \hit@navsymbolsfalse
 \DeclareOptionBeamer{navsymbols}{\hit@navsymbolstrue}
+\DeclareOptionBeamer{nonavsymbols}{\hit@navsymbolsfalse}
 % classic: 使用经典主题（旧 HITBeamer），实现位于 beamerthemehitclassic.sty；
 % 不写或用 touying 都是现代主题 beamerthemehitouying.sty。
 \newif\ifhit@classic \hit@classicfalse
-\DeclareOptionBeamer{classic}{\hit@classictrue}
+\DeclareOptionBeamer{classic}{\hit@classictrue\hit@minimalistfalse}
 % touying: 显式选现代主题；和 classic 同时写时，后写的生效。
-\DeclareOptionBeamer{touying}{\hit@classicfalse}
-% minted: 代码用 minted 排版，两套主题都可用；需要 python 与 pygments。
+\DeclareOptionBeamer{touying}{\hit@classicfalse\hit@minimalistfalse}
+% minimalist: 简约主题（XePWang 提供，带顶部章节导航与浅灰画布）
+\newif\ifhit@minimalist \hit@minimalistfalse
+\DeclareOptionBeamer{minimalist}{\hit@minimalisttrue\hit@classicfalse}
+% minted: 代码用 minted 排版，各套主题都可用；需要 python 与 pygments。
 \newif\ifhit@minted \hit@mintedfalse
 \DeclareOptionBeamer{minted}{\hit@mintedtrue}
 \ProcessOptionsBeamer
@@ -111,13 +125,16 @@
   }
 \fi
 
-% 两套主题各在一个文件里。这里只做分派，两个分支都只放一条 \RequirePackage，
-% 被跳过的分支里不要写条件语句：TeX 跳过时不执行 \newif，后面的 \if 认不出来、
-% \fi 却照样计数，条件会失衡。
+% 三套主题各在一个文件里。这里只做分派，分支里只放 \RequirePackage，
+% 不要在分支里写 \newif：TeX 跳过时不执行它，后面的 \if 会认不出来。
 \ifhit@classic
   \RequirePackage{beamerthemehitclassic}%
 \else
-  \RequirePackage{beamerthemehitouying}%
+  \ifhit@minimalist
+    \RequirePackage{beamerthemehitminimalist}%
+  \else
+    \RequirePackage{beamerthemehitouying}%
+  \fi
 \fi
 
 \mode<all>

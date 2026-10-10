@@ -11,17 +11,18 @@
 %%
 %% 本文件放给文档用的命令与配套包：\TitleSlide 等整页命令、\upcite、\cmd、\env
 %% 等辅助命令，以及 unicode-math、physics、listings 等配套包（原先在旧
-%% HITBeamer 的 hit-extra.sty 里，现在两套主题共用）。样式在主题文件里。
+%% HITBeamer 的 hit-extra.sty 里，现在所有主题共用）。样式在主题文件里。
 %% 配 \usetheme{hit} 使用时，主题会自动加载本文件，命令走完整的定制版式；
 %% 换成 Madrid 等内建主题时，同名命令改用标准 Beamer 写法，例如 \titlepage、
 %% \tableofcontents，文档不必改动即可编译。
 %%
 %%
 %% 更新记录
+%%   v2.2026b  2026/10/10  \TitleSlide 等命令加 minimalist 主题分支。
 %%   v2.2026a  2026/10/09  加 classic 主题分支：\TitleSlide 等命令在经典主题下
 %%                         按旧 HITBeamer 观感实现；旧 hit-extra 的配套包与
 %%                         命令（unicode-math、physics、listings、\upcite、
-%%                         \cmd、\env 等）移入本文件，两套主题共用；
+%%                         \cmd、\env 等）移入本文件，所有主题共用；
 %%                         图表标题编号（caption[numbered]）也在这里统一打开。
 %%   v1.2026b  2026/09/02  配合主题修正校训图定位，本文件无功能改动。
 %%   v1.2026a  2026/08/16  首次发布。
@@ -30,7 +31,7 @@
 %%   \usepackage{beamercmdhit}    % 写在 \usetheme 前后皆可
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{beamercmdhit}[2026/10/09 v2.2026a document commands for the HIT beamer theme]
+\ProvidesPackage{beamercmdhit}[2026/10/10 v2.2026b document commands for the HIT beamer theme]
 
 \RequirePackage{tikz}
 \usetikzlibrary{calc}
@@ -83,10 +84,12 @@
 % vi/ 视觉形象资产目录。放在别处则用 \renewcommand 改掉此值。
 \newcommand{\hitvipath}{vi/}
 
-% 当前主题的标题与作者，模板里写 \title{\themetitle}、\author{\themeauthor}。
-% 各主题文件会覆盖成自己的；没加载 hit 主题时用下面这份缺省。
+% 当前主题的标题、作者与来源说明。模板里写 \title{\themetitle}、\author{\themeauthor}，
+% 来源说明用 \themecredit 排一句。各主题文件会覆盖成自己的；没加载 hit 主题时用缺省。
 \newcommand{\themetitle}{哈尔滨工业大学 Beamer 幻灯片主题——\textsc{hiTouyingBeamer}}
 \newcommand{\themeauthor}{SchrodingerBlume 和 syvshc}
+\newcommand{\themecredit}{本模板的灵感及理念源自于 Typst 的 Touying 主题
+\href{https://github.com/sjtug/touying-sjtu}{touying-simpl-sjtu}。}
 
 % 把盒子等比缩到指定高度，高与深一起计算。
 % 不用 \resizebox{!}{h}，它只管基线以上的部分，遇到基线居中的 minipage 会缩不到位。
@@ -123,25 +126,31 @@
 \newcommand{\hitfooter}[1]{%
   \ifdefined\hit@footerleft\renewcommand{\hit@footerleft}{#1}\fi}
 
-% 命令分派：\hit@theme@loaded 由主题设置，\hit@theme@classic 由经典主题设置。
-% 现代主题走 themed 实现，经典主题走 classic 实现，没加载主题则退回标准写法。
-% 带参数的命令（\FocusSlide、\EndSlide）靠 \expandafter 让目标宏留在条件外面，
-% 用户写在命令后面的 {参数} 才能接上，别改成在分支里直接调用。
+% 命令分派：\hit@theme@loaded 由主题设置，\hit@theme@classic、\hit@theme@minimalist
+% 由对应主题设置。各主题走各自的实现，没加载主题则退回标准写法。
+% 分支里只 \let 挑出实现宏，出了条件再调用：带参命令（\FocusSlide、\EndSlide）
+% 的参数写在命令后面，不能在条件内部直接执行，否则接不上。
 
 % -------------------------------------------------------------- title page ----
 % 白色标题页：右上角校徽，底部校园线稿背景。文字如何排列见主题的 title page 模板。
 \newcommand{\TitleSlide}{%
   \ifdefined\hit@theme@loaded
-    \expandafter\hit@TitleSlide@pick
+    \let\hit@title@outer\hit@TitleSlide@pick
   \else
-    \expandafter\hit@TitleSlide@plain
-  \fi}
+    \let\hit@title@outer\hit@TitleSlide@plain
+  \fi
+  \hit@title@outer}
 \newcommand{\hit@TitleSlide@pick}{%
   \ifdefined\hit@theme@classic
-    \expandafter\hit@TitleSlide@classic
+    \let\hit@title@next\hit@TitleSlide@classic
   \else
-    \expandafter\hit@TitleSlide@themed
-  \fi}
+    \ifdefined\hit@theme@minimalist
+      \let\hit@title@next\hit@TitleSlide@minimalist
+    \else
+      \let\hit@title@next\hit@TitleSlide@themed
+    \fi
+  \fi
+  \hit@title@next}
 \newcommand{\hit@TitleSlide@plain}{%
   \begin{frame}[plain,noframenumbering]\titlepage\end{frame}}
 \newcommand{\hit@TitleSlide@themed}{%
@@ -173,10 +182,19 @@
     \end{center}
   \end{frame}}
 
+% 简约主题的标题页：居中校徽，蓝色色块标题，作者及日期。
+\newcommand{\hit@TitleSlide@minimalist}{%
+  \begingroup
+  \stepcounter{hit@front}%
+  \begin{frame}[t,plain,noframenumbering]
+    \hit@titleslidepage
+  \end{frame}
+  \endgroup}
+
 % 蓝色标题页：上半是校园照片，下半是主色色块。
 % 色块高度随文字变化，但有上限和下限，文字在色块内垂直居中。
 % 文字过多则先降字号，降到最小仍超出则整体缩小。
-% 两套主题下都长这样，所以这些字号也放在共用层。
+% 各套主题下都长这样，所以这些字号也放在共用层。
 % 用 \Large 这类相对字号，文档基础字号在 8pt 到 20pt 之间改时会跟着变。
 \setbeamerfont{hit blue title}{size=\Large,series=\bfseries}
 \setbeamerfont{hit blue subtitle}{size=\normalsize,series=\bfseries}
@@ -216,10 +234,11 @@
 
 \newcommand{\BlueTitleSlide}{%
   \ifdefined\hit@theme@loaded
-    \expandafter\hit@BlueTitleSlide@themed
+    \let\hit@bt@outer\hit@BlueTitleSlide@themed
   \else
-    \expandafter\hit@TitleSlide@plain
-  \fi}
+    \let\hit@bt@outer\hit@TitleSlide@plain
+  \fi
+  \hit@bt@outer}
 \newcommand{\hit@BlueTitleSlide@themed}{%
   \begingroup
   \setbeamertemplate{background}{%
@@ -321,16 +340,22 @@
 
 \newcommand{\OutlineSlide}{%
   \ifdefined\hit@theme@loaded
-    \expandafter\hit@OutlineSlide@pick
+    \let\hit@ol@outer\hit@OutlineSlide@pick
   \else
-    \expandafter\hit@OutlineSlide@plain
-  \fi}
+    \let\hit@ol@outer\hit@OutlineSlide@plain
+  \fi
+  \hit@ol@outer}
 \newcommand{\hit@OutlineSlide@pick}{%
   \ifdefined\hit@theme@classic
-    \expandafter\hit@OutlineSlide@classic
+    \let\hit@ol@next\hit@OutlineSlide@classic
   \else
-    \expandafter\hit@OutlineSlide@themed
-  \fi}
+    \ifdefined\hit@theme@minimalist
+      \let\hit@ol@next\hit@OutlineSlide@minimalist
+    \else
+      \let\hit@ol@next\hit@OutlineSlide@themed
+    \fi
+  \fi
+  \hit@ol@next}
 \newcommand{\hit@OutlineSlide@plain}{%
   \begin{frame}{\hitoutlinetitle}\tableofcontents\end{frame}}
 \newcommand{\hit@OutlineSlide@themed}{%
@@ -364,19 +389,38 @@
     \tableofcontents[sectionstyle=show,subsectionstyle=show/shaded/hide,subsubsectionstyle=show/shaded/hide]
   \end{frame}}
 
+% 简约主题的目录页：前置计数，分派给主题自己的胶囊布局；未定义时回退到纯净目录帧。
+\newcommand{\hit@OutlineSlide@minimalist}{%
+  \begingroup
+  \stepcounter{hit@front}\hit@frontmattertrue
+  \ifdefined\hit@outline@minimalist
+    \hit@outline@minimalist
+  \else
+    \begin{frame}[t]{\hitoutlinetitle}
+      \tableofcontents[hideallsubsections]
+    \end{frame}
+  \fi
+  \endgroup}
+
 % ------------------------------------------------------------- focus slide ----
 \newcommand{\FocusSlide}{%
   \ifdefined\hit@theme@loaded
-    \expandafter\hit@FocusSlide@pick
+    \let\hit@focus@outer\hit@FocusSlide@pick
   \else
-    \expandafter\hit@FocusSlide@plain
-  \fi}
+    \let\hit@focus@outer\hit@FocusSlide@plain
+  \fi
+  \hit@focus@outer}
 \newcommand{\hit@FocusSlide@pick}{%
   \ifdefined\hit@theme@classic
-    \expandafter\hit@FocusSlide@classic
+    \let\hit@focus@next\hit@FocusSlide@classic
   \else
-    \expandafter\hit@FocusSlide@themed
-  \fi}
+    \ifdefined\hit@theme@minimalist
+      \let\hit@focus@next\hit@FocusSlide@minimalist
+    \else
+      \let\hit@focus@next\hit@FocusSlide@themed
+    \fi
+  \fi
+  \hit@focus@next}
 \newcommand{\hit@FocusSlide@plain}[1]{%
   \begin{frame}[c,plain,noframenumbering]\centering{\Large #1\par}\end{frame}}
 \newcommand{\hit@FocusSlide@themed}[1]{%
@@ -403,19 +447,29 @@
   \end{frame}
   \endgroup}
 
+% 简约主题的强调页：由主题的 \hit@focuspage 实现。
+\newcommand{\hit@FocusSlide@minimalist}[1]{%
+  \begingroup\hit@focuspage{#1}\endgroup}
+
 % -------------------------------------------------------------- end slides ----
 \newcommand{\EndSlide}{%
   \ifdefined\hit@theme@loaded
-    \expandafter\hit@EndSlide@pick
+    \let\hit@end@outer\hit@EndSlide@pick
   \else
-    \expandafter\hit@EndSlide@plain
-  \fi}
+    \let\hit@end@outer\hit@EndSlide@plain
+  \fi
+  \hit@end@outer}
 \newcommand{\hit@EndSlide@pick}{%
   \ifdefined\hit@theme@classic
-    \expandafter\hit@EndSlide@classic
+    \let\hit@end@next\hit@EndSlide@classic
   \else
-    \expandafter\hit@EndSlide@themed
-  \fi}
+    \ifdefined\hit@theme@minimalist
+      \let\hit@end@next\hit@EndSlide@minimalist
+    \else
+      \let\hit@end@next\hit@EndSlide@themed
+    \fi
+  \fi
+  \hit@end@next}
 \newcommand{\hit@EndSlide@plain}[1]{%
   \begin{frame}[c,plain,noframenumbering]\centering{\LARGE\bfseries #1\par}\end{frame}}
 % 结束页底图和封面是同一张，主楼在右下方，所以内容同样靠左上排，
@@ -447,5 +501,9 @@
     \centering
     {\Huge #1\par}%
   \end{frame}}
+
+% 简约主题的结束页：由主题的 \hit@endpage 实现。
+\newcommand{\hit@EndSlide@minimalist}[1]{%
+  \begingroup\hit@endpage{#1}\endgroup}
 
 \endinput

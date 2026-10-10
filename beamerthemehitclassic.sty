@@ -26,12 +26,13 @@
 %% Preview: theme=classic aspectratio=43 output=template-classic.pdf
 %%
 %% 更新记录
+%%   v2.2026b  2026/10/10  本文件无功能改动。
 %%   v2.2026a  2026/10/09  首次移植；主色统一为 #166183；fira、siyuan 选项
 %%                         不再保留，minted 改为共用主题选项。
 %%
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{beamerthemehitclassic}[2026/10/09 v2.2026a classic theme for the HIT beamer theme]
+\ProvidesPackage{beamerthemehitclassic}[2026/10/10 v2.2026b classic theme for the HIT beamer theme]
 
 % 单独加载本文件时（不经主题入口），选项开关还没定义，这里补一套默认值：
 % 非 sans、非 top、不显示导航按钮、自动插章节目录帧。
@@ -50,9 +51,12 @@
 \def\hit@theme@loaded{}
 \RequirePackage{beamercmdhit}
 
-% 本主题的标题与作者；模板里用 \title{\themetitle}、\author{\themeauthor}。
+% 本主题的标题、作者与来源说明；模板里用 \title{\themetitle}、\author{\themeauthor}。
 \renewcommand{\themetitle}{经典的哈尔滨工业大学 Beamer 幻灯片主题——HITBeamer}
 \renewcommand{\themeauthor}{syvshc}
+\renewcommand{\themecredit}{本模板移植自旧的
+\href{https://github.com/hithesis/HITBeamer}{HITBeamer}，它基于
+\href{https://github.com/Trinkle23897/THU-Beamer-Theme}{THU-Beamer-Theme}。}
 
 \mode<presentation>
 

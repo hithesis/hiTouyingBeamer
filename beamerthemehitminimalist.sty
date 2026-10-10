@@ -1,0 +1,670 @@
+%% beamerthemehitminimalist.sty
+%% 哈尔滨工业大学 Beamer 简约主题 (Minimalist Theme for the HIT Beamer Theme)
+%%
+%% License: LaTeX Project Public License 1.3c
+%%
+%% This work may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License, either version 1.3c of this license or (at
+%% your option) any later version: https://www.latex-project.org/lppl.txt
+%% This work has the LPPL maintenance status `maintained'.
+%% The Current Maintainer of this work is SchrodingerBlume.
+%% The Author of this theme is XePWang.
+%%
+%% 主题由 XePWang 提供（顶部章节导航、浅灰画布、三段式封面）；并入仓库后
+%% 颜色改成由校色 hitprimary 派生。
+%%
+%% 本文件只负责视觉外观。公共命令与通用版式由 beamercmdhit.sty 提供，各主题共用。
+%%
+%% 更新记录
+%%   v2.2026b  2026/10/10  首个版本（XePWang 提供）：顶部章节导航、浅灰画布、
+%%                         三段式封面与目录；并入仓库时配色改为校色派生。
+%%
+%% 下面这行给 build-previews.sh 自动发现主题、预览画幅与输出文件名：
+%% Preview: theme=minimalist aspectratio=169 output=template-minimalist.pdf
+%%
+%% Usage:
+%%   \documentclass[aspectratio=169]{ctexbeamer}
+%%   \usetheme[minimalist]{hit}
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemehitminimalist}[2026/10/10 v2.2026b minimalist theme for the HIT beamer theme]
+
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+
+\mode<presentation>
+
+% 主题加载标记与公共命令层。
+\def\hit@theme@loaded{}
+\def\hit@theme@minimalist{}
+\RequirePackage{beamercmdhit}
+
+% 本主题的标题、作者、来源说明与目录标题默认值；
+% 模板里用 \title{\themetitle}、\author{\themeauthor}、\hitoutlinetitle。
+\renewcommand{\themetitle}{简约的哈尔滨工业大学 Beamer 幻灯片主题——Minimalist}
+\renewcommand{\themeauthor}{XePWang}
+\renewcommand{\themecredit}{本模板由
+\href{https://github.com/XePWang}{XePWang} 提供。}
+\renewcommand{\hitoutlinetitle}{Outline}
+
+% 单独加载本文件时补全选项开关默认值
+\@ifundefined{ifhit@serif}{\newif\ifhit@serif}{}
+\@ifundefined{ifhit@sans}{\newif\ifhit@sans}{}
+\@ifundefined{ifhit@top}{\newif\ifhit@top}{}
+\@ifundefined{ifhit@navsymbols}{\newif\ifhit@navsymbols}{}
+\@ifundefined{ifhit@sectionpage}{\newif\ifhit@sectionpage}{}
+\@ifundefined{ifhit@opt@sectionpage}{\newif\ifhit@opt@sectionpage}{}
+
+% 字体支持：沿用标准 ctex/TeX Live 配置，serif 选项启用衬线字体
+\ifhit@serif
+  \usefonttheme[stillsansserifmath]{serif}
+\fi
+
+\RequirePackage{totcount}
+\@ifundefined{c@hit@sectiontotal}{\newcounter{hit@sectiontotal}\regtotcounter{hit@sectiontotal}}{}
+
+% 正文垂直对齐：默认居中，top 选项改为顶部对齐
+\ifhit@top\beamer@centeredfalse\fi
+
+% Minimalist 主题默认不插入章节过渡页（除非显式指定 sectionpage 选项）
+\ifhit@opt@sectionpage
+  \hit@sectionpagetrue
+\else
+  \hit@sectionpagefalse
+\fi
+
+% 表格与代码排版设置（仅 minimalist 主题生效）
+\renewcommand{\arraystretch}{1.08}
+\setlength{\tabcolsep}{4.5pt}
+\AtBeginDocument{%
+  \@ifpackageloaded{tabularx}{%
+    \renewcommand{\tabularxcolumn}[1]{>{\raggedright\arraybackslash}p{##1}}%
+  }{}%
+}
+\lstset{
+  language=C++,
+  basicstyle=\ttfamily\fontsize{7.3}{10}\selectfont,
+  keywordstyle=\color{brand}\bfseries,
+  commentstyle=\color{muted},
+  stringstyle=\color{brand!60!black},
+  showstringspaces=false,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  backgroundcolor=\color{pale},
+  frame=none,
+  aboveskip=5pt,
+  belowskip=5pt,
+  xleftmargin=5pt,
+  xrightmargin=5pt,
+  rulecolor=\color{linegray}
+}
+
+% ----------------------------------------------------------------- colors ----
+% 整组颜色都从校色 hitprimary（#166183）与中性色派生：
+% 主色和另两套主题同值，brand 及深浅色按校色调出来。
+\definecolor{hitprimary}{HTML}{166183}
+\definecolor{hitneutraldark}{HTML}{202020}
+\colorlet{brand}{hitprimary}
+\colorlet{borderblue}{brand!40!white}
+\colorlet{ink}{brand!40!hitneutraldark}
+\colorlet{muted}{ink!60!white}
+\colorlet{pale}{brand!8!white}
+\colorlet{canvas}{brand!3!white}
+\colorlet{linegray}{brand!15!white}
+
+% 共用命令与 \BlueTitleSlide 会用到这几个中性名，按简约主题的深浅映射。
+\colorlet{hitneutraldarkest}{ink}
+\colorlet{hitneutrallightest}{pale}
+\colorlet{hitneutrallight}{linegray}
+
+\setbeamercolor{normal text}{fg=ink,bg=canvas}
+\setbeamercolor{background canvas}{bg=canvas}
+\setbeamercolor{frametitle}{fg=white,bg=brand}
+\setbeamercolor{itemize item}{fg=brand}
+\setbeamercolor{alerted text}{fg=brand}
+\setbeamercolor{structure}{fg=brand}
+\setbeamercolor{palette primary}{fg=white,bg=brand}
+\setbeamercolor{block title}{fg=brand,bg=pale}
+\setbeamercolor{block body}{fg=ink,bg=pale}
+
+% ------------------------------------------------------------------ fonts ----
+% 字体尺寸与系列配置（通过 Beamer 字体接口设置）
+\setbeamerfont{normal text}{size=\fontsize{9.5}{13}}
+\setbeamerfont{frametitle}{size=\fontsize{15}{19},series=\bfseries}
+\setbeamerfont{framesubtitle}{size=\fontsize{9.5}{13},series=\mdseries}
+\setbeamerfont{hit outline title}{size=\fontsize{20}{24},series=\bfseries}
+
+% 正文边距与通用模板
+\setbeamersize{text margin left=.7cm,text margin right=.7cm}
+\ifhit@navsymbols\else\setbeamertemplate{navigation symbols}{}\fi
+\setbeamertemplate{background}{}
+\setbeamertemplate{section in head/foot}{\colorbox{brand}{\strut\color{white}\bfseries\insertsectionhead}}
+\setbeamertemplate{section in head/foot shaded}{\colorbox{canvas}{\strut\color{muted}\insertsectionhead}}
+\setbeamertemplate{itemize items}{\raisebox{.15ex}{\tiny\color{brand}$\bullet$}}
+\setbeamertemplate{enumerate items}[default]
+\setbeamertemplate{section in toc}{%
+  \color{brand}\inserttocsectionnumber\quad\color{ink}\inserttocsection\par\vspace{3mm}}
+\setbeamertemplate{section in toc shaded}{%
+  \color{muted!50}\inserttocsectionnumber\quad\inserttocsection\par\vspace{3mm}}
+
+% 章节过渡页实现（仅在开启 sectionpage 选项时触发）
+\newcommand{\hit@minimalist@sectionframe}{%
+  \begin{frame}
+    \setbox\@tempboxa=\vbox{\hsize=\textwidth
+      \tableofcontents[sectionstyle=show/shaded,subsectionstyle=show/shaded/hide,subsubsectionstyle=show/shaded/hide]}%
+    \@tempdima=\dimexpr\textheight-2pt\relax
+    \ifdim\dimexpr\ht\@tempboxa+\dp\@tempboxa\relax>\@tempdima
+      \hit@scaleboxto\@tempboxa{\@tempdima}%
+    \fi
+    \noindent\box\@tempboxa
+  \end{frame}}
+\AtBeginSection[]{%
+  \stepcounter{hit@sectiontotal}%
+  \ifhit@sectionpage
+    \hit@minimalist@sectionframe
+  \fi}
+
+% ---------------------------------------------------------------- headline ----
+% 页眉统一高度（约为页面高度的 11.55%）；左侧为校徽，右侧为连续导航区。
+% 导航区按正文实际章节数 N (2–6) 自动等分，连续铺满可用宽度；最后一格吸收尺寸余量。
+% 当前章以 brand 底色充满整格宽高，其余章节以浅灰底与灰色文字显示。
+\def\hit@logopath{\hitvipath hit-vi-logo-horizontal}
+\newdimen\hit@headheight
+\setlength{\hit@headheight}{0.1155\paperheight}
+\newdimen\hit@headlogowd
+\setlength{\hit@headlogowd}{0.25\paperwidth}
+\newdimen\hit@navavailwd
+\setlength{\hit@navavailwd}{\dimexpr\paperwidth - \hit@headlogowd\relax}
+
+\newcount\hit@nav@count
+\newcount\hit@nav@cur
+\newdimen\hit@nav@cellwd
+\newdimen\hit@nav@lastcellwd
+\newcount\hit@nav@prevactive
+\newif\ifhit@inappendix \hit@inappendixfalse
+\apptocmd{\appendix}{\hit@inappendixtrue}{}{}
+
+% --------------------------------------------------- navigation auto-fit & outline ----
+\newcount\hit@meas@linecount
+\newdimen\hit@meas@maxlinewidth
+\newdimen\hit@meas@totalh
+\newbox\hit@meas@testbox
+\newbox\hit@meas@linebox
+\newbox\hit@meas@natbox
+\newif\ifhit@meas@more
+\newif\ifhit@meas@fitok
+
+\def\hit@meas@measure#1#2#3#4{%
+  \setbox\hit@meas@testbox=\vbox{%
+    \hsize=#2\relax
+    \centering
+    \fontsize{#3}{#4}\selectfont\bfseries
+    \def\newline{\unskip\break\ignorespaces}%
+    \let\\\newline
+    #1\par
+  }%
+  \hit@meas@totalh=\dimexpr\ht\hit@meas@testbox+\dp\hit@meas@testbox\relax
+  \hit@meas@linecount=0\relax
+  \hit@meas@maxlinewidth=0pt\relax
+  \setbox\hit@meas@testbox=\vbox{%
+    \unvcopy\hit@meas@testbox
+    \hit@meas@pop@lines
+  }%
+}
+
+\def\hit@meas@pop@lines{%
+  \loop
+    \unskip\unkern\unpenalty
+    \setbox\hit@meas@linebox=\lastbox
+    \ifvoid\hit@meas@linebox
+      \hit@meas@morefalse
+    \else
+      \hit@meas@moretrue
+      \global\advance\hit@meas@linecount by 1\relax
+      \setbox\hit@meas@natbox=\hbox{\unhcopy\hit@meas@linebox\unskip\unkern}%
+      \ifdim\wd\hit@meas@natbox>\hit@meas@maxlinewidth
+        \global\hit@meas@maxlinewidth=\wd\hit@meas@natbox
+      \fi
+    \fi
+  \ifhit@meas@more\repeat
+}
+
+\def\hit@check@fit#1#2#3#4#5{%
+  \hit@meas@measure{#1}{#2}{#4}{#5}%
+  \hit@meas@fitoktrue
+  \ifnum\hit@meas@linecount>2\relax \hit@meas@fitokfalse \fi
+  \ifdim\hit@meas@maxlinewidth>#2\relax \hit@meas@fitokfalse \fi
+  \ifdim\hit@meas@totalh>#3\relax \hit@meas@fitokfalse \fi
+}
+
+\def\hit@nav@fsize{7.5}
+\def\hit@nav@fskip{9.5}
+
+\def\hit@autofit@nav#1#2#3{%
+  % #1=title, #2=target_w, #3=target_h
+  \hit@check@fit{#1}{#2}{#3}{7.5}{9.5}%
+  \ifhit@meas@fitok
+    \def\hit@nav@fsize{7.5}\def\hit@nav@fskip{9.5}%
+  \else
+    \hit@check@fit{#1}{#2}{#3}{7.0}{8.8}%
+    \ifhit@meas@fitok
+      \def\hit@nav@fsize{7.0}\def\hit@nav@fskip{8.8}%
+    \else
+      \hit@check@fit{#1}{#2}{#3}{6.5}{8.2}%
+      \ifhit@meas@fitok
+        \def\hit@nav@fsize{6.5}\def\hit@nav@fskip{8.2}%
+      \else
+        \hit@check@fit{#1}{#2}{#3}{6.0}{7.6}%
+        \ifhit@meas@fitok
+          \def\hit@nav@fsize{6.0}\def\hit@nav@fskip{7.6}%
+        \else
+          \hit@check@fit{#1}{#2}{#3}{5.5}{7.0}%
+          \ifhit@meas@fitok
+            \def\hit@nav@fsize{5.5}\def\hit@nav@fskip{7.0}%
+          \else
+            \hit@check@fit{#1}{#2}{#3}{5.0}{6.4}%
+            \ifhit@meas@fitok
+              \def\hit@nav@fsize{5.0}\def\hit@nav@fskip{6.4}%
+            \else
+              \def\hit@nav@fsize{5.0}\def\hit@nav@fskip{6.4}%
+              \expandafter\@ifundefined{hit@navwarn@\detokenize{#1}}{%
+                \expandafter\gdef\csname hit@navwarn@\detokenize{#1}\endcsname{}%
+                \PackageWarning{beamerthemehitminimalist}{%
+                  Section title "#1" in navigation exceeds 2 lines even at minimum font size (5pt).\MessageBreak
+                  Please consider using \protect\section[short title]{full title} to provide a shorter title%
+                }%
+              }{}%
+            \fi
+          \fi
+        \fi
+      \fi
+    \fi
+  \fi
+}
+
+\def\hit@ol@curfsize{12}
+\def\hit@ol@curskip{14}
+
+\def\hit@autofit@outline#1#2#3#4#5{%
+  \hit@check@fit{#1}{#2}{#3}{#4}{#5}%
+  \ifhit@meas@fitok
+    \def\hit@ol@curfsize{#4}\def\hit@ol@curskip{#5}%
+  \else
+    \hit@autofit@outline@ladder{#1}{#2}{#3}%
+  \fi
+}
+
+\def\hit@autofit@outline@ladder#1#2#3{%
+  \hit@check@fit{#1}{#2}{#3}{11.0}{13.0}%
+  \ifhit@meas@fitok \def\hit@ol@curfsize{11.0}\def\hit@ol@curskip{13.0}%
+  \else
+    \hit@check@fit{#1}{#2}{#3}{10.0}{12.0}%
+    \ifhit@meas@fitok \def\hit@ol@curfsize{10.0}\def\hit@ol@curskip{12.0}%
+    \else
+      \hit@check@fit{#1}{#2}{#3}{9.0}{11.0}%
+      \ifhit@meas@fitok \def\hit@ol@curfsize{9.0}\def\hit@ol@curskip{11.0}%
+      \else
+        \hit@check@fit{#1}{#2}{#3}{8.0}{10.0}%
+        \ifhit@meas@fitok \def\hit@ol@curfsize{8.0}\def\hit@ol@curskip{10.0}%
+        \else
+          \hit@check@fit{#1}{#2}{#3}{7.5}{9.5}%
+          \ifhit@meas@fitok \def\hit@ol@curfsize{7.5}\def\hit@ol@curskip{9.5}%
+          \else
+            \hit@check@fit{#1}{#2}{#3}{7.0}{8.8}%
+            \ifhit@meas@fitok \def\hit@ol@curfsize{7.0}\def\hit@ol@curskip{8.8}%
+            \else
+              \hit@check@fit{#1}{#2}{#3}{6.5}{8.2}%
+              \ifhit@meas@fitok \def\hit@ol@curfsize{6.5}\def\hit@ol@curskip{8.2}%
+              \else
+                \hit@check@fit{#1}{#2}{#3}{6.0}{7.6}%
+                \ifhit@meas@fitok \def\hit@ol@curfsize{6.0}\def\hit@ol@curskip{7.6}%
+                \else
+                  \def\hit@ol@curfsize{6.0}\def\hit@ol@curskip{7.6}%
+                  \expandafter\@ifundefined{hit@olwarn@\detokenize{#1}}{%
+                    \expandafter\gdef\csname hit@olwarn@\detokenize{#1}\endcsname{}%
+                    \PackageWarning{beamerthemehitminimalist}{%
+                      Section title "#1" in Outline exceeds capsule boundaries even at 6pt.\MessageBreak
+                      Please consider using \protect\section[short title]{full title} to provide a shorter title%
+                    }%
+                  }{}%
+                \fi
+              \fi
+            \fi
+          \fi
+        \fi
+      \fi
+    \fi
+  \fi
+}
+
+\newcommand{\hit@minimalist@nav}{%
+  \ifhit@inappendix
+    \begin{tikzpicture}[x=1pt,y=1pt,baseline=0pt]
+      \useasboundingbox (0,0) rectangle (\the\hit@navavailwd,\the\hit@headheight);
+      \node[anchor=east,inner sep=0pt] at (\the\dimexpr\hit@navavailwd-0.04\paperwidth\relax, 0.5*\the\hit@headheight) {%
+        \color{muted}\fontsize{8.5}{11}\selectfont\bfseries APPENDIX%
+      };
+    \end{tikzpicture}%
+  \else
+    \hit@nav@count=0\relax
+    \def\slideentry##1##2##3##4##5##6{}%
+    \def\sectionentry##1##2##3##4##5{%
+      \ifnum##5=\c@part\relax
+        \advance\hit@nav@count by 1\relax
+      \fi
+    }%
+    \dohead
+    \ifnum\hit@nav@count<1\relax
+      \begin{tikzpicture}[x=1pt,y=1pt,baseline=0pt]
+        \useasboundingbox (0,0) rectangle (\the\hit@navavailwd,\the\hit@headheight);
+      \end{tikzpicture}%
+    \else
+      \hit@nav@cellwd=\dimexpr\hit@navavailwd / \hit@nav@count\relax
+      \hit@nav@lastcellwd=\dimexpr\hit@navavailwd - \hit@nav@cellwd * (\hit@nav@count - 1)\relax
+      \hit@nav@cur=0\relax
+      \hit@nav@prevactive=0\relax
+      \def\sectionentry##1##2##3##4##5{%
+        \ifnum##5=\c@part\relax
+          \advance\hit@nav@cur by 1\relax
+          \ifnum\hit@nav@cur=\hit@nav@count
+            \dimen@=\hit@nav@lastcellwd
+          \else
+            \dimen@=\hit@nav@cellwd
+          \fi
+          \count@=0\relax
+          \ifnum\c@section=##1\relax
+            \ifnum\c@section>0\relax
+              \count@=1\relax
+            \fi
+          \fi
+          \hit@autofit@nav{##2}{\dimexpr\dimen@-4pt\relax}{\dimexpr\hit@headheight-4pt\relax}%
+          \hyperlink{Navigation##3}{%
+            \begin{tikzpicture}[x=1pt,y=1pt,baseline=0pt]
+              \useasboundingbox (0,0) rectangle (\the\dimen@,\the\hit@headheight);
+              \clip (0,0) rectangle (\the\dimen@,\the\hit@headheight);
+              \ifnum\count@=1\relax
+                \fill[brand] (0,0) rectangle (\the\dimen@,\the\hit@headheight);
+                \node[inner sep=0pt,text width=\the\dimexpr\dimen@-4pt\relax,align=center,text=white]
+                  at (0.5*\the\dimen@, 0.5*\the\hit@headheight) {%
+                  \def\newline{\unskip\break\ignorespaces}%
+                  \let\\\newline
+                  \fontsize{\hit@nav@fsize}{\hit@nav@fskip}\selectfont\bfseries ##2%
+                };
+              \else
+                \fill[canvas] (0,0) rectangle (\the\dimen@,\the\hit@headheight);
+                \ifnum\hit@nav@cur>1\relax
+                  \ifnum\hit@nav@prevactive=0\relax
+                    \draw[linegray,line width=0.5pt] (0, 0.2*\the\hit@headheight) -- (0, 0.8*\the\hit@headheight);
+                  \fi
+                \fi
+                \node[inner sep=0pt,text width=\the\dimexpr\dimen@-4pt\relax,align=center,text=muted]
+                  at (0.5*\the\dimen@, 0.5*\the\hit@headheight) {%
+                  \def\newline{\unskip\break\ignorespaces}%
+                  \let\\\newline
+                  \fontsize{\hit@nav@fsize}{\hit@nav@fskip}\selectfont ##2%
+                };
+              \fi
+            \end{tikzpicture}%
+          }%
+          \hit@nav@prevactive=\count@
+        \fi
+      }%
+      \hbox to \hit@navavailwd{\dohead\hss}%
+    \fi
+  \fi
+}
+
+\setbeamertemplate{headline}{%
+  \hbox to \paperwidth{%
+    \begin{tikzpicture}[x=1pt,y=1pt,baseline=0pt]
+      \useasboundingbox (0,0) rectangle (\the\hit@headlogowd,\the\hit@headheight);
+      \node[anchor=west,inner sep=0pt] at (0.03*\the\paperwidth, 0.5*\the\hit@headheight) {%
+        \includegraphics[height=0.065\paperheight,width=\dimexpr\hit@headlogowd-0.05\paperwidth\relax,keepaspectratio]{\hit@logopath}%
+      };
+    \end{tikzpicture}%
+    \hit@minimalist@nav
+  }%
+  \nointerlineskip{\color{linegray}\rule{\paperwidth}{0.45pt}}%
+}
+
+% -------------------------------------------------------------- frametitle ----
+\setbeamercolor{framesubtitle}{fg=white}
+\setbeamerfont{framesubtitle}{size=\fontsize{9.5}{13},series=\mdseries}
+\setbeamertemplate{frametitle}{%
+  \vskip1.2mm
+  \begin{beamercolorbox}[wd=\textwidth,sep=.20cm,leftskip=.03cm,rightskip=.03cm]{frametitle}
+    \usebeamerfont{frametitle}\strut\insertframetitle\strut
+    \ifx\insertframesubtitle\@empty\else
+      \par\vskip.8mm
+      {\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\strut\insertframesubtitle\strut}%
+    \fi
+  \end{beamercolorbox}\vskip0.9mm}
+
+% ---------------------------------------------------------------- footline ----
+\providecommand{\hit@footerleft}{\insertshortinstitute}
+\setbeamertemplate{footline}{%
+  \hbox to\paperwidth{\hspace{.7cm}\color{muted}\fontsize{6.3}{8}\selectfont
+    \hit@footerleft\hfill\insertpagenumber\hspace{.7cm}}\vskip2.3mm}
+
+% ==================================================== 公共命令的主题实现 ====
+% ------------------------------------------------------------- title page ----
+% 封面采用固定三段比例（顶部约 32%、中间蓝带约 42%、底部约 26%）：
+% 顶部居中校徽，中间品牌蓝全通栏贯通左右边缘并居中排布标题组，底部居中作者信息组。
+\def\hit@titleslidepage{%
+  \begin{tikzpicture}[remember picture,overlay]
+    % 浅灰画布全屏背景
+    \fill[canvas] (current page.south west) rectangle (current page.north east);
+    % 顶部校徽：宽约 37% 页宽，高不超过 15% 页高，在顶部浅灰区域居中（中心约距顶部 0.16\paperheight）
+    \node[inner sep=0pt] at ([yshift=-0.16\paperheight]current page.north) {%
+      \includegraphics[width=0.37\paperwidth,height=0.15\paperheight,keepaspectratio]{\hit@logopath}%
+    };
+    % 中部通栏主色蓝带：贯通页面左右边缘（0 到 \paperwidth），高度 0.42\paperheight（0.26H 至 0.68H）
+    \fill[brand] ([yshift=0.26\paperheight]current page.south west)
+      rectangle ([yshift=0.68\paperheight]current page.south east);
+    % 蓝带内居中主标题与可选副标题（垂直中心约在 0.47\paperheight）
+    \node[inner sep=0pt,text=white] at ([yshift=0.47\paperheight]current page.south) {%
+      \parbox[c][0.42\paperheight][c]{0.88\paperwidth}{%
+        \centering
+        {\fontsize{23}{30}\selectfont\bfseries \inserttitle\par}%
+        \ifx\insertsubtitle\@empty\else
+          \vskip 2.5mm
+          {\fontsize{11.5}{15}\selectfont \insertsubtitle\par}%
+        \fi
+      }%
+    };
+    % 底部作者、单位、日期信息组（垂直中心约在 0.13\paperheight）
+    \node[inner sep=0pt,text=brand] at ([yshift=0.13\paperheight]current page.south) {%
+      \parbox[c][0.26\paperheight][c]{0.88\paperwidth}{%
+        \centering\fontsize{10}{14}\selectfont
+        \def\hit@cov@sep{}%
+        \ifx\insertauthor\@empty\else\insertauthor\def\hit@cov@sep{\par\smallskip}\fi
+        \ifx\insertinstitute\@empty\else\hit@cov@sep\insertinstitute\def\hit@cov@sep{\par\smallskip}\fi
+        \ifx\insertdate\@empty\else\hit@cov@sep\insertdate\fi
+      }%
+    };
+  \end{tikzpicture}%
+}
+
+% ----------------------------------------------------------- outline slide ----
+\newdimen\hit@ol@R
+\newdimen\hit@ol@TotalW
+\newdimen\hit@ol@StraightW
+\newdimen\hit@ol@caph
+\newdimen\hit@ol@pitch
+\newdimen\hit@ol@xnum
+\newdimen\hit@ol@wnum
+\newdimen\hit@ol@gap
+\newdimen\hit@ol@xtitle
+\newdimen\hit@ol@xend
+\newdimen\hit@ol@wtitle
+
+\def\hit@ol@count@section#1#2#3#4#5{%
+  \ifnum#5=\c@part\relax
+    \advance\hit@nav@count by 1\relax
+  \fi
+}
+
+\def\hit@ol@prep@section#1#2#3#4#5{%
+  \ifnum#5=\c@part\relax
+    \hit@autofit@outline{#2}{\dimexpr\hit@ol@wtitle-16pt\relax}{\dimexpr\hit@ol@caph-4pt\relax}{\hit@ol@fsize}{\hit@ol@skip}%
+    \expandafter\xdef\csname hit@ol@sz@#1\endcsname{\hit@ol@curfsize}%
+    \expandafter\xdef\csname hit@ol@sk@#1\endcsname{\hit@ol@curskip}%
+  \fi
+}
+
+\def\hit@ol@render@section#1#2#3#4#5{%
+  \ifnum#5=\c@part\relax
+    \advance\hit@nav@cur by 1\relax
+    \pgfmathsetmacro{\yoffset}{(0.5*(\hit@nav@count + 1) - \hit@nav@cur) * \the\hit@ol@pitch / 1pt - 0.5*\the\hit@ol@caph / 1pt}%
+    \coordinate (rowB) at ([yshift=\yoffset pt]current page.west);
+    % 编号胶囊（带跳转链接）
+    \fill[brand,rounded corners=0.5*\the\hit@ol@caph]
+      ([xshift=\hit@ol@xnum]rowB) rectangle ++(\the\hit@ol@wnum, \the\hit@ol@caph);
+    \node[inner sep=0pt,text=white]
+      at ([xshift=\the\dimexpr\hit@ol@xnum+0.5\hit@ol@wnum\relax,yshift=0.5*\the\hit@ol@caph]rowB) {%
+      \hyperlink{Navigation#3}{%
+        \fontsize{\hit@ol@fsize}{\hit@ol@skip}\selectfont\bfseries
+        \ifnum#1<10 0\fi#1%
+      }%
+    };
+    % 标题胶囊（带跳转链接与换行居中支持）
+    \fill[brand,rounded corners=0.5*\the\hit@ol@caph]
+      ([xshift=\hit@ol@xtitle]rowB) rectangle ++(\the\hit@ol@wtitle, \the\hit@ol@caph);
+    \@ifundefined{hit@ol@sz@#1}{%
+      \def\hit@ol@curfsize{\hit@ol@fsize}%
+      \def\hit@ol@curskip{\hit@ol@skip}%
+    }{%
+      \edef\hit@ol@curfsize{\csname hit@ol@sz@#1\endcsname}%
+      \edef\hit@ol@curskip{\csname hit@ol@sk@#1\endcsname}%
+    }%
+    \node[inner sep=0pt,text width=\the\dimexpr\hit@ol@wtitle-16pt\relax,align=center,text=white]
+      at ([xshift=\the\dimexpr\hit@ol@xtitle+0.5\hit@ol@wtitle\relax,yshift=0.5*\the\hit@ol@caph]rowB) {%
+      \hyperlink{Navigation#3}{%
+        \def\newline{\unskip\break\ignorespaces}%
+        \let\\\newline
+        \fontsize{\hit@ol@curfsize}{\hit@ol@curskip}\selectfont\bfseries #2%
+      }%
+    };
+  \fi
+}
+
+\def\hit@outline@draw{%
+  % 统计当前主章节数 N
+  \hit@nav@count=0\relax
+  \let\slideentry\hit@ol@slideentry
+  \let\sectionentry\hit@ol@count@section
+  \dohead
+
+  % 根据章节数 N 动态调整胶囊高度、行距与字号
+  \ifcase\hit@nav@count
+    \hit@ol@caph=26pt\hit@ol@pitch=50pt\def\hit@ol@fsize{12}\def\hit@ol@skip{14}%
+  \or
+    \hit@ol@caph=26pt\hit@ol@pitch=50pt\def\hit@ol@fsize{12}\def\hit@ol@skip{14}%
+  \or
+    \hit@ol@caph=26pt\hit@ol@pitch=50pt\def\hit@ol@fsize{12}\def\hit@ol@skip{14}%
+  \or
+    \hit@ol@caph=25pt\hit@ol@pitch=46pt\def\hit@ol@fsize{11.5}\def\hit@ol@skip{13.5}%
+  \or
+    \hit@ol@caph=23pt\hit@ol@pitch=38pt\def\hit@ol@fsize{11}\def\hit@ol@skip{13}%
+  \or
+    \hit@ol@caph=21pt\hit@ol@pitch=32pt\def\hit@ol@fsize{10}\def\hit@ol@skip{12}%
+  \else
+    \hit@ol@caph=19pt\hit@ol@pitch=27pt\def\hit@ol@fsize{9}\def\hit@ol@skip{11}%
+  \fi
+
+  % 右侧章节胶囊几何参数
+  \hit@ol@xnum=0.44\paperwidth
+  \hit@ol@wnum=34pt
+  \hit@ol@gap=8pt
+  \hit@ol@xtitle=\dimexpr\hit@ol@xnum+\hit@ol@wnum+\hit@ol@gap\relax
+  \hit@ol@xend=0.94\paperwidth
+  \hit@ol@wtitle=\dimexpr\hit@ol@xend-\hit@ol@xtitle\relax
+
+  % 预先在 TikZ 画布外部测量并自适应各章节标题字号与行距
+  \let\slideentry\hit@ol@slideentry
+  \let\sectionentry\hit@ol@prep@section
+  \dohead
+
+  % 开始纯粹的图形与节点绘制
+  \begin{tikzpicture}[remember picture,overlay]
+    % 浅灰画布背景
+    \fill[canvas] (current page.south west) rectangle (current page.north east);
+
+    % 左侧大号 Outline 蓝底区域
+    \coordinate (W) at (current page.west);
+    \hit@ol@R=0.23\paperheight
+    \hit@ol@TotalW=0.32\paperwidth
+    \hit@ol@StraightW=\dimexpr\hit@ol@TotalW-\hit@ol@R\relax
+
+    % 浅蓝外沿轮廓
+    \fill[borderblue]
+      ([yshift=-\hit@ol@R-6.5pt]W) --
+      ++(\hit@ol@StraightW, 0)
+      arc (-90:90:\dimexpr\hit@ol@R+6.5pt\relax) --
+      ([yshift=\hit@ol@R+6.5pt]W) -- cycle;
+
+    % 主色蓝底主体
+    \fill[brand]
+      ([yshift=-\hit@ol@R]W) --
+      ++(\hit@ol@StraightW, 0)
+      arc (-90:90:\hit@ol@R) --
+      ([yshift=\hit@ol@R]W) -- cycle;
+
+    % 蓝底内水平垂直居中大号白色 Outline 标题
+    \node[text=white,inner sep=0pt] at ([xshift=0.5\hit@ol@TotalW]W) {%
+      \fontsize{24}{28}\selectfont\bfseries \hitoutlinetitle%
+    };
+
+    % 逐章排版编号胶囊与标题胶囊，垂直居中排布
+    \hit@nav@cur=0\relax
+    \let\sectionentry\hit@ol@render@section
+    \dohead
+  \end{tikzpicture}%
+}
+
+\def\hit@ol@slideentry#1#2#3#4#5#6{}
+
+\newcommand{\hit@outline@minimalist}{%
+  \begin{frame}[plain,noframenumbering]
+    \setbeamertemplate{navigation symbols}{}%
+    \hit@outline@draw
+  \end{frame}}
+
+% ------------------------------------------------------------- focus slide ----
+\long\def\hit@focuspage#1{%
+  \setbeamercolor{background canvas}{bg=brand}%
+  \begin{frame}[plain,noframenumbering]
+    \color{white}\vspace{6mm}
+    {\fontsize{25}{34}\selectfont\bfseries #1\par}\vspace{6mm}
+    {\color{borderblue}\rule{3cm}{2pt}}
+  \end{frame}}
+
+% -------------------------------------------------------------- end slides ----
+% 致谢页采用三段结构：上方居中校徽，中部通栏蓝带与白色致谢文字，下方通用作者/单位信息。
+\long\def\hit@endpage#1{%
+  \begin{frame}[plain,noframenumbering]
+    \begin{tikzpicture}[remember picture,overlay]
+      % 顶部校徽
+      \node[inner sep=0pt] at ([yshift=-0.16\paperheight]current page.north)
+        {\includegraphics[width=4.8cm,height=0.18\paperheight,keepaspectratio]{\hit@logopath}};
+      % 中部通栏主色带
+      \fill[brand] (current page.south west) ++(0, 0.26\paperheight) rectangle ++(\paperwidth, 0.42\paperheight);
+      % 色带内居中白色致谢文字
+      \node[inner sep=0pt,text=white] at ([yshift=0.47\paperheight]current page.south) {%
+        \parbox[c][0.42\paperheight][c]{0.88\paperwidth}{\centering\fontsize{28}{36}\selectfont\bfseries #1}%
+      };
+      % 底部通用信息（作者与单位均非空时并排显示；为空时静默省略）
+      \node[inner sep=0pt,text=brand,align=center] at ([yshift=0.13\paperheight]current page.south) {%
+        \fontsize{9.5}{13}\selectfont
+        \ifx\insertauthor\@empty\else\insertauthor\fi
+        \ifx\insertinstitute\@empty\else
+          \ifx\insertauthor\@empty\else\quad\fi
+          \insertinstitute
+        \fi
+      };
+    \end{tikzpicture}%
+  \end{frame}}
+
+\mode<all>
+\endinput
