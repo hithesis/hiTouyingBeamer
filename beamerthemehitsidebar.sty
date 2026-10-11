@@ -1,0 +1,144 @@
+%% beamerthemehitsidebar.sty
+%% 哈尔滨工业大学 Beamer 幻灯片主题：侧栏 (Sidebar Theme for the HIT Beamer Theme)
+%%
+%% License: LaTeX Project Public License 1.3c
+%%
+%% This work may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License, either version 1.3c of this license or (at
+%% your option) any later version: https://www.latex-project.org/lppl.txt
+%% This work has the LPPL maintenance status `maintained'.
+%% The Current Maintainer of this work is SchrodingerBlume.
+%%
+%% 移植自 hitszbeamer：https://github.com/YangLaTeX/hitszbeamer
+%% 作者 Jingxuan Yang。并入仓库后主色从校色 hitprimary 派生，导航用左侧栏；
+%% 移除原版的 hitszred 红方案，以及 natbib/multimedia 等主题用不到的依赖。
+%%
+%% 更新记录
+%%   v2.2026b  2026/10/11  首个版本（移植自 hitszbeamer，作者 Jingxuan Yang）。
+%%
+%% 下面这行给 build-previews.sh 自动发现主题、预览画幅与输出文件名：
+%% Preview: theme=sidebar aspectratio=43 output=template-sidebar.pdf
+%%
+%% Usage:
+%%   \documentclass[aspectratio=43]{ctexbeamer}
+%%   \usetheme[sidebar]{hit}
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemehitsidebar}[2026/10/11 v2.2026b sidebar theme for the HIT beamer theme]
+
+\mode<presentation>
+
+% 主题加载标记与公共命令层。
+\def\hit@theme@loaded{}
+\def\hit@theme@sidebar{}
+\RequirePackage{beamercmdhit}
+
+% 本主题的标题、作者与来源说明；模板里用 \title{\themetitle}、\author{\themeauthor}。
+\renewcommand{\themetitle}{带侧栏的哈尔滨工业大学 Beamer 幻灯片主题——Sidebar}
+\renewcommand{\themeauthor}{Jingxuan Yang}
+\renewcommand{\themecredit}{本模板移植自
+\href{https://github.com/YangLaTeX/hitszbeamer}{hitszbeamer}（作者 Jingxuan Yang）。}
+
+% 单独加载本文件时补全选项开关默认值
+\@ifundefined{ifhit@serif}{\newif\ifhit@serif}{}
+\@ifundefined{ifhit@sans}{\newif\ifhit@sans}{}
+\@ifundefined{ifhit@top}{\newif\ifhit@top}{}
+\@ifundefined{ifhit@navsymbols}{\newif\ifhit@navsymbols}{}
+\@ifundefined{ifhit@sectionpage}{\newif\ifhit@sectionpage}{}
+\@ifundefined{ifhit@opt@sectionpage}{\newif\ifhit@opt@sectionpage}{}
+
+% 字体：serif 选项启用衬线字体
+\ifhit@serif\usefonttheme[stillsansserifmath]{serif}\fi
+
+% 正文垂直对齐：默认居中，top 选项改为顶部对齐
+\ifhit@top\beamer@centeredfalse\fi
+
+% 章节页：原版没有，默认不插；显式写 sectionpage 才在每节前插一页目录
+\ifhit@opt@sectionpage\hit@sectionpagetrue\else\hit@sectionpagefalse\fi
+\AtBeginSection[]{%
+  \ifhit@sectionpage
+  \begin{frame}{\hitoutlinetitle}
+    \tableofcontents[hideallsubsections]
+  \end{frame}
+  \fi}
+
+% ----------------------------------------------------------------- colors ----
+% 主色从校色 hitprimary（#166183）派生；hitneutral* 供共用命令层使用。
+\definecolor{hitprimary}{HTML}{166183}
+\definecolor{hitneutraldarkest}{HTML}{000000}
+\definecolor{hitneutraldark}{HTML}{202020}
+\definecolor{hitneutrallight}{HTML}{F3F3F3}
+\definecolor{hitneutrallightest}{HTML}{FFFFFF}
+\colorlet{hit@sidebar@header}{hitprimary}
+
+\setbeamercolor{title}{fg=white,bg=hit@sidebar@header}
+\setbeamercolor{frametitle}{fg=hit@sidebar@header,bg=hit@sidebar@header!30}
+\setbeamerfont{frametitle}{size=\large}
+\setbeamercolor{firstbottomline}{fg=white,bg=hit@sidebar@header!80}
+\setbeamercolor{secondbottomline}{fg=white,bg=hit@sidebar@header}
+\setbeamercolor{block title}{fg=white,bg=hit@sidebar@header}
+\setbeamercolor{block title example}{%
+  use={normal text,example text},fg=white,bg=example text.fg!75!green}
+\setbeamercolor{fine separation line}{}
+\setbeamercolor{item projected}{fg=white}
+\setbeamercolor{palette sidebar primary}{use=normal text,fg=normal text.fg}
+\setbeamercolor{palette sidebar quaternary}{use=structure,fg=structure.fg}
+\setbeamercolor{palette sidebar secondary}{use=structure,fg=structure.fg}
+\setbeamercolor{palette sidebar tertiary}{use=normal text,fg=normal text.fg}
+\setbeamercolor{section in sidebar}{fg=brown}
+\setbeamercolor{section in sidebar shaded}{fg=gray}
+\setbeamercolor{separation line}{}
+\setbeamercolor{sidebar}{bg=hit@sidebar@header!30}
+\setbeamercolor{sidebar}{parent=palette primary}
+\setbeamercolor{structure}{fg=hit@sidebar@header}
+\setbeamercolor{subsection in sidebar}{fg=brown}
+\setbeamercolor{subsection in sidebar shaded}{fg=gray}
+\setbeamercolor{logo}{bg=hit@sidebar@header!50}
+
+% ------------------------------------------------------------------ outer ----
+% 左侧栏：顶部校徽，下面章节导航（每节一项，当前节高亮）。
+\ifhit@navsymbols\else\setbeamertemplate{navigation symbols}{}\fi
+\useoutertheme[width=0.17\linewidth]{sidebar}
+\logo{\includegraphics[width=.11\paperwidth]{\hitvipath hit-vi-logo-badge}}
+
+% ----------------------------------------------------------- fonts/blocks ----
+\usefonttheme{structurebold}
+\setbeamertemplate{caption}[numbered]
+\useinnertheme[shadow]{rounded}
+
+% ---------------------------------------------------------------- footline ----
+% 两行页脚：上排作者 / 机构，下排短标题 / 页码（同原版）。
+\setbeamertemplate{footline}{%
+  \begin{beamercolorbox}[colsep=1.5pt]{upper separation line foot}
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[ht=2.5ex,dp=1.125ex,%
+    leftskip=.3cm,rightskip=.3cm plus1fil]{firstbottomline}%
+    \leavevmode{\usebeamerfont{author in head/foot}\insertshortauthor}%
+    \hfill
+    {\usebeamerfont{institute in head/foot}\usebeamercolor[fg]{frame number}\insertshortinstitute}%
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[ht=2.5ex,dp=1.125ex,%
+    leftskip=.3cm,rightskip=.3cm plus1fil]{secondbottomline}%
+    {\usebeamerfont{title in head/foot}\insertshorttitle}%
+    \hfill
+    {\usebeamerfont{frame number}\usebeamercolor[fg]{frame number}\insertframenumber~\frameofframes~\inserttotalframenumber}%
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[colsep=1.5pt]{lower separation line foot}
+  \end{beamercolorbox}%
+}
+
+% ==================================================== 公共命令的主题实现 ====
+% 封面：普通帧里的 \titlepage（标题框主色底白字），带侧栏，占页码（同原版）。
+\newcommand{\hit@TitleSlide@sidebar}{%
+  \begin{frame}
+    \titlepage
+  \end{frame}}
+
+% 目录页：带标题条的普通帧，只到节一级（同原版）。
+\newcommand{\hit@OutlineSlide@sidebar}{%
+  \begin{frame}{\hitoutlinetitle}
+    \tableofcontents[hideallsubsections]
+  \end{frame}}
+
+\mode<all>
+\endinput

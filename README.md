@@ -8,9 +8,9 @@
 
 ## 预览
 
-| 现代（默认） | 简约（`minimalist`） | 经典（`classic`） |
-| :---: | :---: | :---: |
-| [<img src="preview/touying.png" width="400">](template.pdf) | [<img src="preview/minimalist.png" width="400">](template-minimalist.pdf) | [<img src="preview/classic.png" width="330">](template-classic.pdf) |
+| 现代（默认） | 简约（`minimalist`） | 经典（`classic`） | 侧栏（`sidebar`） |
+| :---: | :---: | :---: | :---: |
+| [<img src="preview/touying.png" width="400">](template.pdf) | [<img src="preview/minimalist.png" width="400">](template-minimalist.pdf) | [<img src="preview/classic.png" width="330">](template-classic.pdf) | [<img src="preview/sidebar.png" width="330">](template-sidebar.pdf) |
 
 ## 主题
 
@@ -19,6 +19,7 @@
 | 现代 | 不写 / `touying` | 16:9 | [SchrodingerBlume](https://github.com/SchrodingerBlume) | 默认主题，Touying 风格 |
 | 简约 | `minimalist` | 16:9 | [XePWang](https://github.com/XePWang) | 顶部章节导航、浅灰画布 |
 | 经典 | `classic` | 4:3 | [syvshc](https://github.com/syvshc) | 移植自旧 [HITBeamer](https://github.com/hithesis/HITBeamer) |
+| 侧栏 | `sidebar` | 4:3 | [Jingxuan Yang](https://github.com/YangLaTeX) | 左侧栏导航与两行页脚，移植自 [hitszbeamer](https://github.com/YangLaTeX/hitszbeamer) |
 
 ## 快速开始
 
@@ -57,12 +58,12 @@ latexmk -xelatex template.tex
 
 | 选项 | 说明 |
 | --- | --- |
-| `touying` / `classic` / `minimalist` | 选择主题；不写为现代主题 |
+| `touying` / `classic` / `minimalist` / `sidebar` | 选择主题；不写为现代主题 |
 | `minted` | 代码用 minted 排版（编译加 `-shell-escape`） |
 | `serif` / `sans` | 衬线 / 非衬线字体；经典默认衬线，现代与简约默认非衬线 |
 | `top` / `center` | 正文顶部对齐 / 垂直居中（默认） |
 | `navsymbols` / `nonavsymbols` | 右下角翻页按钮：显示 / 隐藏（默认） |
-| `sectionpage` / `nosectionpage` | 章节页开关：现代、经典默认插，简约默认不插，显式写了以写的为准 |
+| `sectionpage` / `nosectionpage` | 章节页开关：现代、经典默认插，简约、侧栏默认不插，显式写了以写的为准 |
 
 ## 专用命令
 
@@ -87,6 +88,7 @@ latexmk -xelatex template.tex
 | `beamerthemehitouying.sty` | 现代主题 |
 | `beamerthemehitclassic.sty` | 经典主题 |
 | `beamerthemehitminimalist.sty` | 简约主题 |
+| `beamerthemehitsidebar.sty` | 侧栏主题 |
 | `beamercmdhit.sty` | 文档命令与配套包（`\upcite`、`\cmd`、`\env`、unicode-math、physics、listings 等），各主题共用，主题会自动加载 |
 | `template.tex` | 模板兼完整示例，从这里开始写 |
 | `vi/` | 哈尔滨工业大学视觉形象素材（获取自网络，经 AI 处理，如有侵权请联系 hiThesis 团队） |

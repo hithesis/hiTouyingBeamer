@@ -13,6 +13,7 @@
 %%   beamerthemehitouying.sty      现代主题（默认，写 touying 也一样）
 %%   beamerthemehitclassic.sty     经典主题（classic 选项，移植自旧 HITBeamer）
 %%   beamerthemehitminimalist.sty  简约主题（minimalist 选项，XePWang 提供）
+%%   beamerthemehitsidebar.sty     侧栏主题（sidebar 选项，移植自 hitszbeamer）
 %% \TitleSlide、\OutlineSlide 这些给文档用的命令在 beamercmdhit.sty 里，
 %% 本主题会自动加载它。
 %%
@@ -23,6 +24,8 @@
 %%       浅灰画布）；sectionpage/nosectionpage 改成记录用户是否显式写过，
 %%       供默认不插章节页的主题使用。
 %%     - top/center、navsymbols/nonavsymbols 补成对选项，覆盖各主题默认。
+%%     - 新增 sidebar 选项：侧栏主题（移植自 hitszbeamer，作者 Jingxuan Yang，
+%%       左侧栏导航与两行页脚）。
 %%   v2.2026a  2026/10/09
 %%     - 新增 classic 选项：经典主题，移植自旧的 HITBeamer 主题
 %%       （https://github.com/hithesis/HITBeamer，基于 THU-Beamer-Theme）。
@@ -55,6 +58,7 @@
 %%   classic       - 用经典主题（旧 HITBeamer 观感）；不写则用现代主题
 %%   touying       - 用现代主题（默认），写不写都一样
 %%   minimalist    - 用简约主题（带顶部章节导航与浅灰画布）
+%%   sidebar       - 用侧栏主题（移植自 hitszbeamer，左侧栏导航）
 %%   minted        - 代码用 minted 排版（编译要加 -shell-escape）
 %%   serif         - 用衬线字体（经典主题的默认）
 %%   sans          - 用非衬线字体（现代主题的默认）
@@ -96,12 +100,15 @@
 % classic: 使用经典主题（旧 HITBeamer），实现位于 beamerthemehitclassic.sty；
 % 不写或用 touying 都是现代主题 beamerthemehitouying.sty。
 \newif\ifhit@classic \hit@classicfalse
-\DeclareOptionBeamer{classic}{\hit@classictrue\hit@minimalistfalse}
+\DeclareOptionBeamer{classic}{\hit@classictrue\hit@minimalistfalse\hit@sidebarfalse}
 % touying: 显式选现代主题；和 classic 同时写时，后写的生效。
-\DeclareOptionBeamer{touying}{\hit@classicfalse\hit@minimalistfalse}
+\DeclareOptionBeamer{touying}{\hit@classicfalse\hit@minimalistfalse\hit@sidebarfalse}
 % minimalist: 简约主题（XePWang 提供，带顶部章节导航与浅灰画布）
 \newif\ifhit@minimalist \hit@minimalistfalse
-\DeclareOptionBeamer{minimalist}{\hit@minimalisttrue\hit@classicfalse}
+\DeclareOptionBeamer{minimalist}{\hit@minimalisttrue\hit@classicfalse\hit@sidebarfalse}
+% sidebar: 侧栏主题（移植自 hitszbeamer，左侧栏导航）
+\newif\ifhit@sidebar \hit@sidebarfalse
+\DeclareOptionBeamer{sidebar}{\hit@sidebartrue\hit@classicfalse\hit@minimalistfalse}
 % minted: 代码用 minted 排版，各套主题都可用；需要 python 与 pygments。
 \newif\ifhit@minted \hit@mintedfalse
 \DeclareOptionBeamer{minted}{\hit@mintedtrue}
@@ -133,7 +140,11 @@
   \ifhit@minimalist
     \RequirePackage{beamerthemehitminimalist}%
   \else
-    \RequirePackage{beamerthemehitouying}%
+    \ifhit@sidebar
+      \RequirePackage{beamerthemehitsidebar}%
+    \else
+      \RequirePackage{beamerthemehitouying}%
+    \fi
   \fi
 \fi
 

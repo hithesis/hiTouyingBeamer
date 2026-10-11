@@ -76,6 +76,15 @@
     frame=shadowbox,
 }
 
+% 平行符号（移植自 hitszbeamer），各主题共用。
+\newcommand{\varparallel}{%
+  \mathrel{%
+    \text{%
+      \tikz[baseline] \draw (0em,-0.3ex) -- (.4em,1.7ex) (.2em,-0.3ex) -- (.6em,1.7ex);
+    }%
+  }%
+}
+
 % 页脚页码的分隔符；经典主题的页脚用它。
 \newcommand{\frameofframes}{/}
 \newcommand{\setframeofframes}[1]{\renewcommand{\frameofframes}{#1}}
@@ -126,8 +135,8 @@
 \newcommand{\hitfooter}[1]{%
   \ifdefined\hit@footerleft\renewcommand{\hit@footerleft}{#1}\fi}
 
-% 命令分派：\hit@theme@loaded 由主题设置，\hit@theme@classic、\hit@theme@minimalist
-% 由对应主题设置。各主题走各自的实现，没加载主题则退回标准写法。
+% 命令分派：\hit@theme@loaded 由主题设置，\hit@theme@classic、\hit@theme@minimalist、
+% \hit@theme@sidebar 由对应主题设置。各主题走各自的实现，没加载主题则退回标准写法。
 % 分支里只 \let 挑出实现宏，出了条件再调用：带参命令（\FocusSlide、\EndSlide）
 % 的参数写在命令后面，不能在条件内部直接执行，否则接不上。
 
@@ -147,7 +156,11 @@
     \ifdefined\hit@theme@minimalist
       \let\hit@title@next\hit@TitleSlide@minimalist
     \else
-      \let\hit@title@next\hit@TitleSlide@themed
+      \ifdefined\hit@theme@sidebar
+        \let\hit@title@next\hit@TitleSlide@sidebar
+      \else
+        \let\hit@title@next\hit@TitleSlide@themed
+      \fi
     \fi
   \fi
   \hit@title@next}
@@ -352,7 +365,11 @@
     \ifdefined\hit@theme@minimalist
       \let\hit@ol@next\hit@OutlineSlide@minimalist
     \else
-      \let\hit@ol@next\hit@OutlineSlide@themed
+      \ifdefined\hit@theme@sidebar
+        \let\hit@ol@next\hit@OutlineSlide@sidebar
+      \else
+        \let\hit@ol@next\hit@OutlineSlide@themed
+      \fi
     \fi
   \fi
   \hit@ol@next}
@@ -417,7 +434,11 @@
     \ifdefined\hit@theme@minimalist
       \let\hit@focus@next\hit@FocusSlide@minimalist
     \else
-      \let\hit@focus@next\hit@FocusSlide@themed
+      \ifdefined\hit@theme@sidebar
+        \let\hit@focus@next\hit@FocusSlide@plain
+      \else
+        \let\hit@focus@next\hit@FocusSlide@themed
+      \fi
     \fi
   \fi
   \hit@focus@next}
@@ -466,7 +487,11 @@
     \ifdefined\hit@theme@minimalist
       \let\hit@end@next\hit@EndSlide@minimalist
     \else
-      \let\hit@end@next\hit@EndSlide@themed
+      \ifdefined\hit@theme@sidebar
+        \let\hit@end@next\hit@EndSlide@plain
+      \else
+        \let\hit@end@next\hit@EndSlide@themed
+      \fi
     \fi
   \fi
   \hit@end@next}
