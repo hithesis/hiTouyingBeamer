@@ -3,6 +3,7 @@
 #   tests/ci.sh                      命令跨主题检查 + 各主题编译 + 版本/标记检查
 #   tests/ci.sh --base <旧版目录>     再与旧版逐页回归对比（CI 的 PR 流水线用它）
 # 环境变量 ALLOW_OUTPUT_CHANGE=1 时，回归差异只警告不失败（维护者审核 PR 用）。
+# 带 --base 时末尾输出一行机器可读统计：CI-DIFF: <差异页数>/<总页数>（tools/push.sh 读它）。
 set -eu
 cd "$(dirname "$0")/.."
 root=$(pwd)
@@ -116,6 +117,8 @@ done
 if [ -n "$base" ]; then
   base=$(cd "$base" && pwd)
   base_themes=$(theme_list "$base")
+  diff_total=0
+  page_total=0
   # 删主题（base 有、head 没有）必须人工审核
   for bline in $base_themes; do
     bt=${bline%%|*}
@@ -166,6 +169,14 @@ if [ -n "$base" ]; then
     bc=$(ls "$bd" | wc -l | tr -d ' ')
     hc=$(ls "$hd" | wc -l | tr -d ' ')
 
+    nd=0
+    if [ -n "$diff_pages" ]; then nd=$(printf '%s\n' $diff_pages | grep -c .); fi
+    if [ "$hc" -ge "$bc" ]; then
+      diff_total=$((diff_total + nd + hc - bc)); page_total=$((page_total + hc))
+    else
+      diff_total=$((diff_total + nd + bc - hc)); page_total=$((page_total + bc))
+    fi
+
     if [ -n "$diff_pages" ] || [ "$bc" -ne "$hc" ]; then
       mkdir -p "$root/ci-out"
       cp "$base_tree/tpl-$t.pdf" "$root/ci-out/$t-base.pdf"
@@ -180,6 +191,8 @@ if [ -n "$base" ]; then
       note "主题 $t 回归通过（$hc 页逐页一致）"
     fi
   done
+
+  note "CI-DIFF: $diff_total/$page_total"
 fi
 
 if [ "$failed" -eq 0 ]; then
