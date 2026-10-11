@@ -69,12 +69,13 @@ if [ "$(printf '%s' "$sub" | tr 'A-Z' 'a-z')" != "$(printf '%s' "$vers" | tr 'A-
 fi
 
 # ---------------------------------------------------------------- 命令跨主题 ----
-# 公开命令 = 所有 .sty 里的 \newcommand / \providecommand / \def（排除带 @ 的内部名）。
+# 公开命令 = 所有 .sty 里的 \newcommand / \providecommand / \def（排除带 @ 的内部名，
+# 以及 beamer 的导航钩子 slideentry/sectionentry——主题里会 \def 覆写它们）。
 cmds=$(
   {
     grep -hoE '\\(new|provide)command\{\\[A-Za-z][A-Za-z0-9]*\}' "$root"/*.sty | sed 's/.*{\\//; s/}$//'
     grep -hoE '\\def\\[A-Za-z][A-Za-z0-9]*#' "$root"/*.sty | sed 's/^\\def\\//; s/#$//'
-  } | sort -u
+  } | grep -vxE 'slideentry|sectionentry' | sort -u
 )
 [ -n "$cmds" ] || problem "没有从 .sty 里提取到公开命令"
 
@@ -115,6 +116,14 @@ done
 if [ -n "$base" ]; then
   base=$(cd "$base" && pwd)
   base_themes=$(theme_list "$base")
+  # 删主题（base 有、head 没有）必须人工审核
+  for bline in $base_themes; do
+    bt=${bline%%|*}
+    if ! printf '%s\n' "$themes" | grep -q "^$bt|"; then
+      problem "主题 ${bt} 在当前版本里被删除，需要人工审核"
+    fi
+  done
+
   base_tree="$work/base"
   mkdir -p "$base_tree"
   cp "$base/template.tex" "$base/ref.bib" "$base"/*.sty "$base_tree"/
@@ -133,6 +142,8 @@ if [ -n "$base" ]; then
       if [ "$side" = "base" ]; then tree=$base_tree; else tree=$head_tree; fi
       sed -e "s/\\\\usetheme{hit}/\\\\usetheme[$t]{hit}/" \
           -e "s/aspectratio=169/aspectratio=$ar/" \
+          -e "s/\\\\subtitle{[^}]*}/\\\\subtitle{CI-NORMALIZED}/" \
+          -e "s/\\\\date{[^}]*}/\\\\date{CI-NORMALIZED}/" \
           "$tree/template.tex" > "$tree/tpl-$t.tex"
       if ! (cd "$tree" && latexmk -xelatex -interaction=nonstopmode "tpl-$t.tex" > "tpl-$t.log" 2>&1); then
         grep '^!' "$tree/tpl-$t.log" | head -n 10 >&2 || true

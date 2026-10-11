@@ -1,9 +1,11 @@
 #!/bin/sh
-# 发布前生成所有子主题的预览 PDF，放进仓库。
+# 发布前生成所有子主题的预览 PDF 与封面图，放进仓库。
+# PDF 在仓库根目录（README 预览链接用），封面图在 preview/（README 缩略图用）。
 # 主题自动发现：扫描 beamerthemehit*.sty（入口 beamerthemehit.sty 除外），
 # 凡带下面这行标记的都算一个主题，新增主题只要加皮肤文件并在文件头写标记：
 #   %% Preview: theme=<主题选项> aspectratio=<169|43> output=<预览 PDF 文件名>
-# 在临时目录里编译，只把 PDF 拷回仓库。需要 XeLaTeX、latexmk 与 biber。
+# 在临时目录里编译，只把成品拷回仓库。需要 XeLaTeX、latexmk、biber 与
+# poppler（pdftoppm 出封面图）。
 set -eu
 cd "$(dirname "$0")"
 root=$(pwd)
@@ -19,6 +21,7 @@ trap 'rm -rf "$work"' EXIT INT TERM
 
 cp template.tex ref.bib ./*.sty "$work"/
 cp -R vi "$work"/
+mkdir -p "$root/preview"
 
 found=0
 for f in beamerthemehit*.sty; do
@@ -48,6 +51,7 @@ for f in beamerthemehit*.sty; do
     exit 1
   fi
   cp "$work/$job.pdf" "$root/$out"
+  pdftoppm -png -singlefile -r 100 -f 1 -l 1 "$work/$job.pdf" "$root/preview/$theme"
   found=$((found + 1))
 done
 

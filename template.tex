@@ -1,18 +1,20 @@
 % 更现代的哈尔滨工业大学 Beamer 幻灯片主题 hiTouyingBeamer 示例
+% License: LaTeX Project Public License 1.3c；维护状态 maintained，维护者 SchrodingerBlume。
 % 编译：latexmk -xelatex template.tex （参考文献需要 biber，latexmk 会自动调用）
 % 画幅写 169 或 43；还可以加基础字号，从 8pt 到 20pt 都支持，
-% 版式里的间距和字号都是相对值，会跟着一起缩放。
-% 本文件同时是现代与经典两套主题的示例：把 \usetheme 那行写成 [classic] 就是
-% 经典主题观感，正文不用动。
+% 版式里的间距和字号都是相对值，会跟着一起缩放（简约主题字号固定，不随基础字号变）。
+% 本文件同时是现代、经典与简约三套主题的示例：把 \usetheme 那行写成 [classic] 或
+% [minimalist] 即可切换，正文不用动。
 \documentclass[aspectratio=169]{ctexbeamer} % 或 43
 % 主题选项写在方括号里，可以叠加，例如 \usetheme[serif,top,navsymbols]{hit}：
 %   minted        用 minted 排版代码；不写则不用（编译要加 -shell-escape）。
 %   classic       换用经典主题（旧 HITBeamer 观感）。
 %   touying       用现代主题（默认），写不写都一样。
+%   minimalist    换用简约主题（带顶部章节导航与浅灰画布）。
 %   serif         用衬线字体；经典主题不写就是衬线。
 %   sans          用非衬线字体；现代主题不写就是非衬线。
-%   top           正文顶部对齐；不写则垂直居中。
-%   navsymbols    显示右下角翻页按钮；不写则隐藏。
+%   top / center  正文顶部对齐 / 垂直居中（默认）。
+%   navsymbols / nonavsymbols  显示 / 隐藏右下角翻页按钮（默认隐藏）。
 %   nosectionpage 不在每个 \section 处自动插入章节过渡页。
 \usetheme{hit}
 % 命令层，提供 \TitleSlide 等命令。hit 主题会自动加载它；
@@ -45,7 +47,7 @@
 \addbibresource{ref.bib}
 
 \title{\themetitle}
-\subtitle{V2.2026a}
+\subtitle{V2.2026b}
 \author{\themeauthor}
 \date{\today}
 \institute{哈尔滨工业大学}
@@ -77,9 +79,8 @@
 \subsection{Beamer}
 
 \begin{frame}{Beamer}
-  Beamer 是 LaTeX 的幻灯片文档类。beamer 一词来自德语，意为投影仪；
-  而本模板的灵感及理念源自于 Typst 的 Touying 主题
-  \href{https://github.com/sjtug/touying-sjtu}{touying-simpl-sjtu}。
+  Beamer 是 LaTeX 的幻灯片文档类。beamer 一词来自德语，意为投影仪。
+  \themecredit
   你可以在\href{https://latex.us/macros/latex/contrib/beamer/doc/beameruserguide.pdf}{The \textsc{Beamer} \textit{class}}
   中详细了解其用法。
   \parencite{beamer2026}
@@ -394,6 +395,8 @@ $V = \frac{4}{3}\pi r^3$
       \href{https://github.com/hithesis/HITBeamer}{HITBeamer}
       （作者 syvshc），它基于
       \href{https://github.com/Trinkle23897/THU-Beamer-Theme}{THU-Beamer-Theme}。
+    \item \textbf{简约主题}（\texttt{minimalist} 选项）由
+      \href{https://github.com/XePWang}{XePWang} 提供。
   \end{itemize}
 \end{frame}
 

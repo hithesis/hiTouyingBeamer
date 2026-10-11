@@ -22,7 +22,8 @@
 .ci-base/
 ci-out/
 
-# 除预览 PDF（template.pdf 现代、template-classic.pdf 经典）外的 PDF 都不入库
+# 除预览 PDF（template.pdf 现代、template-classic.pdf 经典、template-minimalist.pdf 简约）外的 PDF 都不入库
 *.pdf
 !template.pdf
 !template-classic.pdf
+!template-minimalist.pdf

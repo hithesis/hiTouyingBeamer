@@ -17,11 +17,12 @@
 %% Preview: theme=touying aspectratio=169 output=template.pdf
 %%
 %% 更新记录
+%%   v2.2026b  2026/10/10  本文件无功能改动。
 %%   v2.2026a  2026/10/09  从 beamerthemehit.sty 拆出，内容不变。
 %%
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{beamerthemehitouying}[2026/10/09 v2.2026a touying-style modern theme for the HIT beamer theme]
+\ProvidesPackage{beamerthemehitouying}[2026/10/10 v2.2026b touying-style modern theme for the HIT beamer theme]
 
 \RequirePackage{tikz}
 \usetikzlibrary{calc}
@@ -33,9 +34,11 @@
 \def\hit@theme@loaded{}
 \RequirePackage{beamercmdhit}
 
-% 本主题的标题与作者；模板里用 \title{\themetitle}、\author{\themeauthor}。
+% 本主题的标题、作者与来源说明；模板里用 \title{\themetitle}、\author{\themeauthor}。
 \renewcommand{\themetitle}{更现代的哈尔滨工业大学 Beamer 幻灯片主题——\textsc{hiTouyingBeamer}}
 \renewcommand{\themeauthor}{SchrodingerBlume}
+\renewcommand{\themecredit}{本模板的灵感及理念源自于 Typst 的 Touying 主题
+\href{https://github.com/sjtug/touying-sjtu}{touying-simpl-sjtu}。}
 
 \mode<presentation>
 

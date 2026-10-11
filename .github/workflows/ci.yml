@@ -17,14 +17,27 @@ jobs:
         if: github.event_name == 'pull_request'
         run: git worktree add .ci-base "${{ github.event.pull_request.base.sha }}"
 
+      - name: 读回归审核标签（实时查询，重跑也准）
+        id: labels
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          allow=""
+          if gh api "repos/${{ github.repository }}/issues/${{ github.event.number }}/labels" \
+               --jq '.[].name' 2>/dev/null | grep -qx 'theme-output-change'; then
+            allow=1
+          fi
+          echo "allow=$allow" >> "$GITHUB_OUTPUT"
+
       - name: 跑检查（命令跨主题 + 回归）
         uses: xu-cheng/texlive-action@v3
         with:
           scheme: full
           run: |
-            apk add --no-cache poppler-utils
+            apk add --no-cache poppler-utils poppler-data
             if [ -d .ci-base ]; then
-              ALLOW_OUTPUT_CHANGE="${{ contains(github.event.pull_request.labels.*.name, 'theme-output-change') && '1' || '' }}" \
+              ALLOW_OUTPUT_CHANGE="${{ steps.labels.outputs.allow }}" \
                 sh tests/ci.sh --base .ci-base
             else
               sh tests/ci.sh

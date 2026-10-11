@@ -1,27 +1,26 @@
 # 更现代的哈尔滨工业大学 Beamer 幻灯片主题 hiTouyingBeamer（读作「嗨！投影 Beamer」）
 
-**预览**：[现代主题（默认，16:9）](template.pdf)　·　[经典主题（`classic` 选项，4:3）](template-classic.pdf)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/hithesis/hiTouyingBeamer)
+![GitHub License](https://img.shields.io/github/license/hithesis/hiTouyingBeamer)
 
 本主题的灵感来自于上海交通大学 Touying 幻灯片主题
 （[touying-simpl-sjtu](https://github.com/sjtug/touying-sjtu)）。
 
-## 文件结构
+## 预览
 
-| 文件 | 说明 |
-| --- | --- |
-| `beamerthemehit.sty` | 主题入口（`\usetheme{hit}`）：解析选项，分派到主题文件 |
-| `beamerthemehitouying.sty` | 现代主题：颜色、字体、模板、版式（默认，写 `touying` 也一样） |
-| `beamerthemehitclassic.sty` | 经典主题（`classic` 选项）：移植自旧 [HITBeamer](https://github.com/hithesis/HITBeamer) |
-| `beamercmdhit.sty` | 文档命令（`\TitleSlide` 等）与配套包（`\upcite`/`\cmd`/`\env`、unicode-math、physics、listings 等），两套主题共用，主题会自动加载 |
-| `template.tex` | 模板兼完整示例（动画、TikZ、双栏、跨页、块与公式、表格、代码清单、GB/T 7714 参考文献等），现代与经典两套主题共用，从这里开始写 |
-| `vi/` | 哈尔滨工业大学视觉形象素材（均获取自网络，经 AI 处理，如有侵权请联系 hiThesis 团队） |
+| 现代（默认） | 简约（`minimalist`） | 经典（`classic`） |
+| :---: | :---: | :---: |
+| [<img src="preview/touying.png" width="400">](template.pdf) | [<img src="preview/minimalist.png" width="400">](template-minimalist.pdf) | [<img src="preview/classic.png" width="330">](template-classic.pdf) |
 
-样式与命令是分开的。`beamercmdhit.sty` 里的专用命令在加载 hit 主题时会处理为定制版式，
-而未加载时自动改用标准 Beamer 写法，例如 `\titlepage`、`\tableofcontents`。
-所以只要文档里保留 `\usepackage{beamercmdhit}`，把 `\usetheme{hit}` 换成任意
-内建主题（如 `Madrid`）仍可直接编译。
+## 主题
 
-## 使用
+| 主题 | 选项 | 画幅 | 作者 | 说明 |
+| --- | --- | --- | --- | --- |
+| 现代 | 不写 / `touying` | 16:9 | [SchrodingerBlume](https://github.com/SchrodingerBlume) | 默认主题，Touying 风格 |
+| 简约 | `minimalist` | 16:9 | [XePWang](https://github.com/XePWang) | 顶部章节导航、浅灰画布 |
+| 经典 | `classic` | 4:3 | [syvshc](https://github.com/syvshc) | 移植自旧 [HITBeamer](https://github.com/hithesis/HITBeamer) |
+
+## 快速开始
 
 ```latex
 \documentclass[aspectratio=169]{ctexbeamer}
@@ -34,104 +33,79 @@
 \date{\today}
 
 \begin{document}
-\TitleSlide      % 白色标题页（或 \BlueTitleSlide 蓝色标题页）
+\TitleSlide      % 白色封面（\BlueTitleSlide 为照片封面）
 \OutlineSlide    % 目录页
 
-\section{...}    % 每个 \section 自动生成章节过渡页
-\subsection{...}
+\section{第一节}
 \begin{frame}{帧标题}
-  ...
+  正文
 \end{frame}
 
-\appendix        % 附录：隐藏页脚并冻结页码总数
-\EndSlide{感谢使用\par\medskip Thanks for  Using!}
+\EndSlide{感谢使用\par\medskip Thanks for Using!}
 \end{document}
 ```
 
-应使用 XeLaTeX 编译：
+用 XeLaTeX 编译，参考文献（biber）由 latexmk 自动处理：
 
 ```console
 latexmk -xelatex template.tex
 ```
 
-`template.tex` 中的参考文献使用 `biblatex-gb7714-2015`，需要 `biber`
-（`latexmk` 会自动调用）。章节过渡页与导航条需要编译两遍才能稳定。
-打开 `minted` 选项时命令改成 `latexmk -xelatex -shell-escape template.tex`。
+`template.tex` 是模板兼完整示例，从这里开始写；章节过渡页与导航条需要编译两遍才稳定。
+
+## 主题选项
+
+| 选项 | 说明 |
+| --- | --- |
+| `touying` / `classic` / `minimalist` | 选择主题；不写为现代主题 |
+| `minted` | 代码用 minted 排版（编译加 `-shell-escape`） |
+| `serif` / `sans` | 衬线 / 非衬线字体；经典默认衬线，现代与简约默认非衬线 |
+| `top` / `center` | 正文顶部对齐 / 垂直居中（默认） |
+| `navsymbols` / `nonavsymbols` | 右下角翻页按钮：显示 / 隐藏（默认） |
+| `sectionpage` / `nosectionpage` | 章节页开关：现代、经典默认插，简约默认不插，显式写了以写的为准 |
 
 ## 专用命令
 
 | 命令 | 说明 |
 | --- | --- |
-| `\TitleSlide` / `\BlueTitleSlide` | 白色 / 蓝色标题页 |
-| `\OutlineSlide` | 目录页（标题文字可 `\renewcommand{\hitoutlinetitle}{...}`） |
-| `\FocusSlide{...}` | 蓝底白字强调页 |
+| `\TitleSlide` / `\BlueTitleSlide` | 白色 / 照片封面 |
+| `\OutlineSlide` | 目录页（标题可 `\renewcommand{\hitoutlinetitle}{...}`） |
+| `\FocusSlide{...}` | 整页强调页 |
 | `\EndSlide{...}` | 结束页 |
-| `\hitfooter{...}` | 页脚左侧文字（默认继承  `\institute`） |
-| `\themetitle` / `\themeauthor` | 当前主题的标题 / 作者，各主题预置；模板用 `\title{\themetitle}`、`\author{\themeauthor}` |
-| `\renewcommand{\hitvipath}{...}` | `vi/` 视觉形象资产目录路径（默认 `vi/`） |
+| `\hitfooter{...}` | 页脚左侧文字（默认继承 `\institute`） |
+| `\themetitle` / `\themeauthor` / `\themecredit` | 当前主题预置的标题 / 作者 / 来源说明 |
+| `\renewcommand{\hitvipath}{...}` | `vi/` 视觉形象资产目录路径 |
 
-封面与目录属于前置页，用小写罗马数字计数（`i`、`ii`、`iii`），正文页码从 1 重新起算
-（仅现代主题；经典主题按 beamer 原样连续编号）。`\hitfooter` 只在现代主题生效，
-经典主题的页脚固定为旧 HITBeamer 的两行样式。
+封面、目录等前置页用罗马数字计数，正文从 1 起算（现代主题）；简约显示物理页码，
+经典按 beamer 原样。
 
-## 主题选项
+## 文件结构
 
-```latex
-\usetheme[classic]{hit}        % 经典主题（旧 HITBeamer 观感）；不写则用现代主题
-\usetheme[touying]{hit}        % 现代主题（默认），写与不写一样
-\usetheme[minted]{hit}         % 代码用 minted 排版（编译加 -shell-escape）
-\usetheme[serif]{hit}          % 用衬线字体（经典主题的默认）
-\usetheme[sans]{hit}           % 用非衬线字体（现代主题的默认）
-\usetheme[top]{hit}            % 正文顶端对齐（默认垂直居中）
-\usetheme[navsymbols]{hit}     % 显示右下角翻页按钮（默认隐藏）
-\usetheme[nosectionpage]{hit}  % 不自动生成章节过渡页（经典主题下跳过 \section 后的目录帧）
-```
+| 文件 | 说明 |
+| --- | --- |
+| `beamerthemehit.sty` | 主题入口（`\usetheme{hit}`）：解析选项，分派到主题文件 |
+| `beamerthemehitouying.sty` | 现代主题 |
+| `beamerthemehitclassic.sty` | 经典主题 |
+| `beamerthemehitminimalist.sty` | 简约主题 |
+| `beamercmdhit.sty` | 文档命令与配套包（`\upcite`、`\cmd`、`\env`、unicode-math、physics、listings 等），各主题共用，主题会自动加载 |
+| `template.tex` | 模板兼完整示例，从这里开始写 |
+| `vi/` | 哈尔滨工业大学视觉形象素材（获取自网络，经 AI 处理，如有侵权请联系 hiThesis 团队） |
 
-## 经典主题（classic 选项）
+## 安装到 TEXMFHOME（可选）
 
-`\usetheme[classic]{hit}` 切换到移植自 HITBeamer 的经典主题：顶部 smoothbars
-导航条（章节名加小节方块）、整条深蓝帧标题、两行页脚、circle 列表、编号圆球目录，
-每个 `\section` 与 `\subsection` 后自动插一页目录。主色统一为校色 `#166183`
-（旧版是 `#00668E`）。`\TitleSlide`、`\OutlineSlide`、`\FocusSlide`、`\EndSlide`
-在经典主题下都有一套经典版式；`\BlueTitleSlide`（照片蓝色封面）是共用命令，
-两套主题下一样。
+把 `.sty` 和 `vi/` 放进 `TEXMFHOME`（如 `~/texmf/tex/latex/hitouyingbeamer/`），
+再在文档里 `\renewcommand{\hitvipath}{<vi 的绝对路径>/}`。
 
-原 hit-extra 的配套包与命令（ctex、unicode-math、physics、listings、multicol、
-booktabs 等，以及 `\upcite`、`\cmd`、`\env`）在共用命令层 `beamercmdhit.sty` 里，
-两套主题都可用。从 v2.2026a 起数学字体由 unicode-math 排（Latin Modern Math）。
-minted 是主题选项，每个主题均可使用：`\usetheme[classic,minted]{hit}`，编译加
-`-shell-escape`。
+## 从旧 HITBeamer 迁移
 
-对于旧的基于未经自行修改的 HITBeamer 的文档只需将文档类改成新写法即可，正文一般不用修改：
-
-```latex
-% 旧：\documentclass{beamer} + \usepackage{hit-style} + \usepackage[minted,fira,siyuan]{hit-extra}
-\documentclass[aspectratio=169]{ctexbeamer}
-\usetheme[classic,minted]{hit}   % minted 按需；HITbeamer的 fira、siyuan 选项不再提供
-```
-
-旧文档里的 `\bibliographystyle{hithesis}\bibliography{...}` 依赖 `hithesis.bst`，
-本仓库不附带，可以换成 `template.tex` 里的 biblatex-gb7714-2015 方案，
-或自行保证 bst 可用。
-
-## 把主题装进 TeX 目录树（可选）
-
-若不想把 `.sty` 和 `vi/` 复制到每个项目，可把它们一起放入
-`TEXMFHOME`（如 `~/texmf/tex/latex/hitouyingbeamer/`），并在文档中
-`\renewcommand{\hitvipath}{<vi 的绝对路径>/}`。
-
-## 发布前
-
-跑一次 `./build-previews.sh`：它在临时目录里编译所有子主题，并把各自的预览 PDF
-拷回仓库（现代 16:9 `template.pdf`、经典 4:3 `template-classic.pdf`），连同改动
-一起提交。主题是自动发现的：脚本扫描 `beamerthemehit*.sty` 里文件头的
-`%% Preview:` 标记（主题选项、画幅、输出文件名），以后新增主题只要在皮肤文件里
-加上这行标记，不用改脚本。
-
-贡献与提交规则（命令必须两套主题通用、输出变化需人工审核等）见
-[CONTRIBUTING.md](CONTRIBUTING.md)；本地自测跑 `./tests/ci.sh`。
+见旧仓库 [hithesis/HITBeamer](https://github.com/hithesis/HITBeamer) 的 README。
 
 ## License
 
-本项目采用 LaTeX Project Public License 1.3c（LPPL-1.3c）发布，详见 [LICENSE](LICENSE)。
-维护状态为 `maintained`，当前维护者 @SchrodingerBlume。
+本作品采用 LaTeX Project Public License 1.3c（LPPL-1.3c）发布，[LICENSE](LICENSE)
+是 LPPL 全文；维护状态为 `maintained`，当前维护者
+[@SchrodingerBlume](https://github.com/SchrodingerBlume)。
+
+版权与来源：现代主题派生自 touying-simpl-sjtu（© 2025 tzhtaylor）；经典主题移植自
+HITBeamer（作者 [syvshc](https://github.com/syvshc)，基于 THU-Beamer-Theme）；
+简约主题由 [XePWang](https://github.com/XePWang) 提供。
